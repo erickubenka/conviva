@@ -1,0 +1,72 @@
+ext {
+    testerraVersion = '2.8-SNAPSHOT'
+}
+
+apply plugin: 'java-library'
+
+group 'de.codefever.conviva'
+version '1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    // Uncomment it for Testerra SNAPSHOTS
+    maven {
+        url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = "UTF-8"
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+dependencies {
+    // ui stuff from Testerra
+    implementation "io.testerra:driver-ui-desktop:${testerraVersion}"
+    implementation "io.testerra:report-ng:${testerraVersion}"
+
+    implementation 'org.json:json:20240303'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+}
+
+repositories {
+    mavenCentral()
+}
+
+test {
+
+    useTestNG() {
+        suites file('src/test/resources/suite.xml')
+    }
+
+    testLogging {
+        outputs.upToDateWhen { false }
+        showStandardStreams = true
+    }
+
+    options {
+        systemProperties(System.getProperties())
+    }
+
+    // basically execution returns "GREEN" (framework exits with exit code > 0 if there were failures)
+    ignoreFailures = true
+}
+
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.codefever.conviva.ConvivaBot'
+        attributes 'Multi-Release': 'true'
+    }
+
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "guice-4.2.2-no_aop.jar")
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
