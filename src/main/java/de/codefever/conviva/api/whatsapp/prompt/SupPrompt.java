@@ -14,7 +14,7 @@ public class SupPrompt implements Prompt {
     private final List<Message> messages;
 
     private static final String SYSTEM_PROMPT = "Du bist ein Assistent, welcher mir den Inhalt von Chatverläufen themenbasierend zusammenfasst und gruppiert.";
-    private static final String USER_PROMPT = "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginns des Themas aus: \"ab dd.MM.YYYY hh:mm Uhr\".";
+    private static final String USER_PROMPT = "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginns des Themas aus: \"ab dd.MM.yyyy hh:mm Uhr\".";
 
     public SupPrompt(List<Message> messages) {
         this.messages = messages;
@@ -26,7 +26,7 @@ public class SupPrompt implements Prompt {
     }
 
     /**
-     * Builds string with static prompt "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginn s des Themas aus: \"ab dd.MM.YYYY hh:mm Uhr\".""
+     * Builds string with static prompt "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginn s des Themas aus: \"ab dd.MM.yyyy hh:mm Uhr\".""
      *
      * @return
      */
@@ -35,7 +35,7 @@ public class SupPrompt implements Prompt {
 
         final StringBuilder prompt = new StringBuilder(USER_PROMPT);
         for (Message message : messages) {
-            prompt.append(String.format("%s : %s", message.dateTime.format(DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm")), message.message)).append("\n");
+            prompt.append(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage())).append("\n");
         }
 
         return prompt.toString();

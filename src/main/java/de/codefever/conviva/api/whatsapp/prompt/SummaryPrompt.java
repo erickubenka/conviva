@@ -14,7 +14,7 @@ public class SummaryPrompt implements Prompt {
     private final List<Message> messages;
 
     private static final String SYSTEM_PROMPT = "Du bist ein Assistent, welcher mir den Inhalt von Chatverläufen themenbasierend zusammenfasst und gruppiert.";
-    private static final String USER_PROMPT = "Fasse den Chatverlauf zusammen. Gruppiere die Nachrichten nach Themen. Pro Thema MAXIMAL 3 Stichpunkte. Zeitstempel der ersten Nachricht des Thems angeben \"ab dd.MM.YYYY hh:mm Uhr\".";
+    private static final String USER_PROMPT = "Fasse den Chatverlauf zusammen. Gruppiere die Nachrichten nach Themen. Pro Thema MAXIMAL 3 Stichpunkte. Zeitstempel der ersten Nachricht des Thems angeben \"ab dd.MM.yyyy hh:mm Uhr\".";
 
     public SummaryPrompt(List<Message> messages) {
         this.messages = messages;
@@ -35,7 +35,7 @@ public class SummaryPrompt implements Prompt {
 
         final StringBuilder prompt = new StringBuilder(USER_PROMPT);
         for (Message message : messages) {
-            prompt.append(String.format("%s : %s", message.dateTime.format(DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm")), message.message)).append("\n");
+            prompt.append(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage())).append("\n");
         }
 
         return prompt.toString();

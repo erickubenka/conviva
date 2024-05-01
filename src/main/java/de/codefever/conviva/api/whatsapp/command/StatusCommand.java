@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class StatusCommand implements BotCommand {
 
-    private LocalDateTime startTime;
+    private final LocalDateTime startTime;
 
     public StatusCommand(LocalDateTime startTime) {
         this.startTime = startTime;
@@ -34,8 +34,8 @@ public class StatusCommand implements BotCommand {
 
     @Override
     public String run(List<Message> messages) {
-        return "Online seit " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm:ss")) + ". " +
-                "\nIch kann dir " + messages.size() + " Nachrichten seit " + messages.get(0).dateTime.format(DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm")) + " zusammenfassen. ";
+        return "Online seit " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + ". " +
+                "\nIch kann dir " + messages.size() + " Nachrichten seit " + messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. ";
     }
 
     @Override

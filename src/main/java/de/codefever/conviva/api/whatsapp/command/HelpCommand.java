@@ -34,9 +34,9 @@ public class HelpCommand implements BotCommand {
     public String run(List<Message> messages) {
 
         final StringBuilder output = new StringBuilder("Folgende Befehle sind verfügbar:");
-        output.append("\n" + command() + " - " + description());
+        output.append("\n").append(command()).append(" - ").append(description());
         for (BotCommand command : availableCommands) {
-            output.append("\n" + command.command() + " - " + command.description());
+            output.append("\n").append(command.command()).append(" - ").append(command.description());
         }
 
         return output.toString();

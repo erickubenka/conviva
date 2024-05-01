@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class StopCommand implements BotCommand, WebDriverManagerProvider {
 
-    private String botName;
+    private final String botName;
 
     public StopCommand(String botName) {
         this.botName = botName;

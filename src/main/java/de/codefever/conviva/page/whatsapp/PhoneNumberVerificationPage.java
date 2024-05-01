@@ -9,7 +9,7 @@ import org.openqa.selenium.WebDriver;
 public class PhoneNumberVerificationPage extends Page {
 
     @Check
-    private UiElement verificationCode = find(By.xpath("//div[@aria-details='link-device-phone-number-code-screen-instructions'] "));
+    private final UiElement verificationCode = find(By.xpath("//div[@aria-details='link-device-phone-number-code-screen-instructions'] "));
 
     public PhoneNumberVerificationPage(WebDriver webDriver) {
         super(webDriver);

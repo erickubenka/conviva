@@ -4,6 +4,7 @@ import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.constants.Browsers;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
+import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.useragents.ChromeConfig;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -12,6 +13,7 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
 
     public static void main(String[] args) {
 
+        JVMMonitor.start();
         WEB_DRIVER_MANAGER.setUserAgentConfig(Browsers.chromeHeadless, new ChromeConfig() {
             @Override
             public void configure(ChromeOptions options) {
@@ -27,6 +29,7 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
 
         // final exit
         WEB_DRIVER_MANAGER.requestShutdownAllSessions();
+        JVMMonitor.stop();
         System.exit(0);
     }
 }

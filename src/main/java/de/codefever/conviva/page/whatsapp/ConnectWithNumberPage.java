@@ -13,14 +13,14 @@ public class ConnectWithNumberPage extends Page {
 
     @Check
 //    private UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Gib deine Telefonnummer ein.']"));
-    private UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Type your phone number.']"));
+    private final UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Type your phone number.']"));
 
     @Check
 //    private UiElement buttonNext = find(By.xpath("//button//div[text()='Weiter']"));
-    private UiElement buttonNext = find(By.xpath("//button//div[text()='Next']"));
+    private final UiElement buttonNext = find(By.xpath("//button//div[text()='Next']"));
 
     @Check
-    private UiElement selectCountryButton = find(By.xpath("//button//span[@data-icon='caret-down']"));
+    private final UiElement selectCountryButton = find(By.xpath("//button//span[@data-icon='caret-down']"));
 
     public ConnectWithNumberPage(WebDriver webDriver) {
         super(webDriver);

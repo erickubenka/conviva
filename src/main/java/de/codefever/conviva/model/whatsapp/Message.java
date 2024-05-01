@@ -12,22 +12,22 @@ public class Message {
     /**
      * The metadata of the message.
      */
-    public String metaData;
+    private final String metaData;
 
     /**
      * The message content.
      */
-    public String message;
+    private final String message;
 
     /**
      * The date and time of the message.
      */
-    public LocalDateTime dateTime;
+    private LocalDateTime dateTime;
 
     /**
      * The author of the message.
      */
-    public String author;
+    private String author;
 
     /**
      * Creates a new message.
@@ -35,10 +35,26 @@ public class Message {
      * @param metaData the metadata of the message
      * @param message  the message content
      */
-    public Message(String metaData, String message) {
+    public Message(final String metaData, final String message) {
         this.metaData = metaData;
         this.message = message;
         parseMetaData();
+    }
+
+    public String getMetaData() {
+        return metaData;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 
     /**
@@ -46,9 +62,9 @@ public class Message {
      */
     private void parseMetaData() {
 
-        String[] split = metaData.split("]");
-        String date = split[0].substring(1);
-        String author = split[1].substring(1);
+        final String[] split = metaData.split("]");
+        final String date = split[0].substring(1);
+        final String author = split[1].substring(1);
 
         try {
             this.dateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("HH:mm, M/d/yyyy"));

@@ -16,7 +16,7 @@ public class HomePage extends Page {
 //    private UiElement buttonArchived = find(By.xpath("//button[contains(@aria-label,'Archiviert')]"));
 
     @Check(timeout = 60)
-    private UiElement chatList = find(By.xpath("//div[@aria-label='Chatliste']"));
+    private final UiElement chatList = find(By.xpath("//div[@aria-label='Chatliste']"));
 //    private UiElement chatList = find(By.xpath("//div[@aria-label='Chats']"));
 
     public HomePage(WebDriver webDriver) {

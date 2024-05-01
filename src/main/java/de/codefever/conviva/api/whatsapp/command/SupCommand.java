@@ -30,9 +30,9 @@ public class SupCommand implements BotCommand {
     public String run(List<Message> messages) {
 
         final SupPrompt prompt = new SupPrompt(messages);
-        log().info("Prompt: " + prompt.userPrompt());
+        log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new CompletionsApiClient().postCompletion(prompt);
-        log().info("SUP: " + summary);
+        log().info("SUP: {}", summary);
         return summary;
     }
 

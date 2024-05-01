@@ -17,6 +17,7 @@ import de.codefever.conviva.page.whatsapp.LoginPage;
 import de.codefever.conviva.page.whatsapp.PhoneNumberVerificationPage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
+import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
@@ -133,7 +134,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         // init messages
         this.messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES);
         this.messages = filterMessages(this.messages);
-        this.messages.sort(Comparator.comparing(o -> o.dateTime));
+        this.messages.sort(Comparator.comparing(Message::getDateTime));
 
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
@@ -147,14 +148,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         if (!START_SILENT) {
             this.sendMessage(chatPage, outputStart +
                     "\nHi, ich bin " + BOT_NAME + " und jetzt verfügbar." +
-                    "\nIch kann dir " + filterMessages(this.messages).size() + " Nachrichten seit " + filterMessages(this.messages).get(0).dateTime.format(DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm")) + " zusammenfassen. " +
+                    "\nIch kann dir " + filterMessages(this.messages).size() + " Nachrichten seit " + filterMessages(this.messages).get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. " +
                     "\nSchreibe !help für Hilfe.");
         }
 
         boolean stop = false;
         while (!stop) {
             // sort
-            this.messages.sort(Comparator.comparing(o -> o.dateTime));
+            this.messages.sort(Comparator.comparing(Message::getDateTime));
 
             List<Message> newMessages = new ArrayList<>();
             try {
@@ -171,12 +172,12 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
                     // add new message to history
                     messages.add(newMessage);
-                    log().info("Added message to list: " + newMessage.message);
+                    log().info("Added message to list: " + newMessage.getMessage());
 
-                    if (newMessage.dateTime.isAfter(startTime)) {
+                    if (newMessage.getDateTime().isAfter(startTime)) {
                         for (final BotCommand command : this.commands) {
                             // check for registered commands and run.
-                            if (newMessage.message.trim().toLowerCase().equals(command.command())) {
+                            if (newMessage.getMessage().trim().toLowerCase().equals(command.command())) {
 
                                 // StopCommand extra definition
                                 if (command instanceof StopCommand) {
@@ -211,16 +212,18 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                         }
 
                         // highlight - todo - for future commands
-                        if (newMessage.message.contains("@" + BOT_NAME)) {
-                            log().info("Highlight: " + newMessage.message);
+                        if (newMessage.getMessage().contains("@" + BOT_NAME)) {
+                            log().info("Highlight: " + newMessage.getMessage());
                         }
                     }
                 }
             }
 
             // cleanup
-            messages.removeIf(message -> message.dateTime.isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-            System.gc();
+            messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+//            System.gc();
+            JVMMonitor.getMeasurements();
+            log().info(JVMMonitor.getJVMUsageInfo());
             TimerUtils.sleep(250);
         }
     }
@@ -289,7 +292,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
         return unfilteredList.stream().filter(message -> {
             for (final String part : messagePartsToIgnore) {
-                if (message.message.contains(part)) {
+                if (message.getMessage().contains(part)) {
                     return false;
                 }
             }

@@ -12,11 +12,11 @@ import org.openqa.selenium.WebDriver;
 public class LoginPage extends Page {
 
     @Check
-    private UiElement qrCode = find(By.cssSelector("canvas[aria-label='Scan me!']"));
+    private final UiElement qrCode = find(By.cssSelector("canvas[aria-label='Scan me!']"));
 
     //    @Check
 //    private UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button' and text()='Via Telefonnummer verknüpfen']"));
-    private UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button' and text()='Link with phone number']"));
+    private final UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button' and text()='Link with phone number']"));
 
     public LoginPage(WebDriver webDriver) {
         super(webDriver);

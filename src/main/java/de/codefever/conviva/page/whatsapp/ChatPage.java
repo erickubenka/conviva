@@ -99,17 +99,17 @@ public class ChatPage extends HomePage {
         while (LocalDateTime.now().isBefore(startTime.plusMinutes(startTimeout))) {
             final Message message = firstMessageOfList();
             if (message != null) {
-                if (message.dateTime.isBefore(dateTime)) {
+                if (message.getDateTime().isBefore(dateTime)) {
                     break;
                 }
-                log().info("Latest message found: {}", message.dateTime);
+                log().info("Latest message found: {}", message.getDateTime());
             }
             this.inputChat.sendKeys(Keys.PAGE_UP);
             TimerUtils.sleep(500);
         }
 
         final List<Message> visibleMessages = this.visibleMessages(includeOwnMessages);
-        visibleMessages.sort(Comparator.comparing(o -> o.dateTime));
+        visibleMessages.sort(Comparator.comparing(Message::getDateTime));
         log().info("Found {} messages in {} seconds.", visibleMessages.size(), ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
         return visibleMessages;
     }

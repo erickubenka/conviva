@@ -30,9 +30,9 @@ public class SummaryCommand implements BotCommand {
     public String run(List<Message> messages) {
 
         final SummaryPrompt prompt = new SummaryPrompt(messages);
-        log().info("Prompt: " + prompt.userPrompt());
+        log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new CompletionsApiClient().postCompletion(prompt);
-        log().info("Summary: " + summary);
+        log().info("Summary: {}", summary);
         return summary;
     }
 
