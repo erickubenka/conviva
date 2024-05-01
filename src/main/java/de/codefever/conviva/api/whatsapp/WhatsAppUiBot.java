@@ -128,7 +128,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      */
     public void run() {
 
-        log().info("Starting Bot " + BOT_NAME);
+        log().info("Starting Bot {} in chat {} at {}.", BOT_NAME, chatName, startTime);
         ChatPage chatPage = this.performLogin();
 
         // init messages
@@ -164,7 +164,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 PAGE_FACTORY.createPage(HomePage.class);
                 chatPage = PAGE_FACTORY.createPage(ChatPage.class);
             } catch (Exception e) {
-                log().error("Error while getting messages: " + e.getMessage());
+                log().error("Error while getting messages: {}", e.getMessage());
             }
 
             for (Message newMessage : newMessages) {
@@ -172,7 +172,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
                     // add new message to history
                     messages.add(newMessage);
-                    log().info("Added message to list: " + newMessage.getMessage());
+                    log().info("Added message to list: {}", newMessage.getMessage());
 
                     if (newMessage.getDateTime().isAfter(startTime)) {
                         for (final BotCommand command : this.commands) {
@@ -213,16 +213,18 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
                         // highlight - todo - for future commands
                         if (newMessage.getMessage().contains("@" + BOT_NAME)) {
-                            log().info("Highlight: " + newMessage.getMessage());
+                            log().info("Highlight: {}", newMessage.getMessage());
                         }
+                    } else {
+                        log().info("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
                     }
                 }
             }
 
             // cleanup
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-//            System.gc();
             log().info(JVMMonitor.getJVMUsageInfo());
+            log().info("Messages in cache: {}", messages.size());
             TimerUtils.sleep(250);
         }
     }

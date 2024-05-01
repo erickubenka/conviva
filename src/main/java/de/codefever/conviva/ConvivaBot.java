@@ -9,6 +9,7 @@ import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.useragents.ChromeConfig;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+
 public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverManagerProvider {
 
     public static void main(String[] args) {
@@ -24,6 +25,11 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
         });
 
         PROPERTY_MANAGER.loadProperties("conviva.properties");
+//        ChromeDriver chromeDriver = WEB_DRIVER_MANAGER.unwrapWebDriver(WEB_DRIVER_MANAGER.getWebDriver(), ChromeDriver.class).get();
+//        DevTools devTools = chromeDriver.getDevTools();
+//        devTools.createSession();
+//        devTools.send(Emulation.setTimezoneOverride("Europe/Berlin"));
+
         final WhatsAppUiBot whatsAppUiBot = new WhatsAppUiBot();
         whatsAppUiBot.run();
 

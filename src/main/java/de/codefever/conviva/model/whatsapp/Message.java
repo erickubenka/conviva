@@ -1,13 +1,16 @@
 package de.codefever.conviva.model.whatsapp;
 
+import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
+
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
  * Represents a message in a WhatsApp chat.
  */
-public class Message {
+public class Message implements PropertyManagerProvider {
 
     /**
      * The metadata of the message.
@@ -71,11 +74,26 @@ public class Message {
         } catch (DateTimeParseException e) {
             this.dateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("HH:mm, d.M.yyyy"));
         }
+
+        // transform if necessary, take the dateTime and suggest it is in UTC timezione, then transform it to the Europe/Berlin timezone
+        if (!PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages").equals(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"))) {
+            this.dateTime = this.dateTime.atZone(ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages"))).withZoneSameInstant(ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"))).toLocalDateTime();
+        }
+
         this.author = author;
     }
 
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Message && ((Message) obj).dateTime.equals(this.dateTime) && ((Message) obj).message.equals(message);
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "metaData='" + metaData + '\'' +
+                ", message='" + message + '\'' +
+                ", dateTime=" + dateTime +
+                '}';
     }
 }

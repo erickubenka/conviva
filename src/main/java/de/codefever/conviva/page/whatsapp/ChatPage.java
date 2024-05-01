@@ -162,7 +162,14 @@ public class ChatPage extends HomePage {
      */
     private Message firstMessageOfList() {
         final UiElement messageElement = find(By.cssSelector("div.message-in div.copyable-text"));
-        return this.parseMessageFromUi(messageElement);
+        final Message message = this.parseMessageFromUi(messageElement);
+
+        if (message != null) {
+            return message;
+        }
+
+        final UiElement messageElementOut = find(By.cssSelector("div.message-out div.copyable-text"));
+        return this.parseMessageFromUi(messageElementOut);
     }
 
     /**
@@ -195,7 +202,9 @@ public class ChatPage extends HomePage {
                 final String textOfMessage = spanTextBuilder.toString();
                 if (date != null && !textOfMessage.isEmpty() && !date.isEmpty()) {
                     try {
-                        return new Message(date, spanTextBuilder.toString());
+                        final Message message = new Message(date, spanTextBuilder.toString());
+                        log().info("Message parsed successfully: {}", message);
+                        return message;
                     } catch (Exception e) {
                         log().warn("Could not parse message: {} with date: {}", spanTextBuilder, date);
                     }
