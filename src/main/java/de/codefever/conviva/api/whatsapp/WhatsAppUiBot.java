@@ -222,7 +222,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             // cleanup
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
 //            System.gc();
-            JVMMonitor.getMeasurements();
             log().info(JVMMonitor.getJVMUsageInfo());
             TimerUtils.sleep(250);
         }
