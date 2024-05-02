@@ -8,6 +8,7 @@ import eu.tsystems.mms.tic.testframework.pageobjects.UiElementList;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 
@@ -24,9 +25,9 @@ public class ChatPage extends HomePage {
 
 
     @Check
-    private UiElement inputChat = find(By.xpath("//div[@role='textbox' and @title = 'Gib eine Nachricht ein.']"));
+    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @title = 'Gib eine Nachricht ein.']"));
 
-    private UiElement buttonSend = find(By.xpath("//button[@aria-label='Senden']")); //
+    private final UiElement buttonSend = find(By.xpath("//button[@aria-label='Senden']")); //
 
     public ChatPage(WebDriver webDriver) {
         super(webDriver);
@@ -41,16 +42,21 @@ public class ChatPage extends HomePage {
      */
     public synchronized ChatPage sendMessage(String message) {
 
-        if (message.contains("\n")) {
-            String[] lines = message.split("\n");
-            for (String line : lines) {
-                inputChat.sendKeys(line);
-                Actions actions = new Actions(getWebDriver());
-                actions.keyDown(Keys.SHIFT).sendKeys(Keys.ENTER).keyUp(Keys.SHIFT).build().perform();
+        CONTROL.retryTimes(3, () -> {
+            this.inputChat.clear();
+            final Actions actions = new Actions(getWebDriver());
+            if (message.contains("\n")) {
+                final String[] lines = message.split("\n");
+                for (String line : lines) {
+                    actions.sendKeys(line);
+                    actions.keyDown(Keys.SHIFT).sendKeys(Keys.ENTER).keyUp(Keys.SHIFT);
+                }
+                // actually send.
+                actions.build().perform();
+            } else {
+                inputChat.sendKeys(message);
             }
-        } else {
-            inputChat.sendKeys(message);
-        }
+        });
 
         CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
         buttonSend.click();

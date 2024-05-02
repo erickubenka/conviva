@@ -16,4 +16,4 @@ COPY ./build/libs/conviva.properties /app/conviva.properties
 WORKDIR /app
 
 # https://medium.com/@anurag2397/solving-javas-core-problems-around-memory-and-cpu-4d0c97748c43
-CMD ["java", "--add-opens=java.base/java.lang=ALL-UNNAMED", "-jar", "conviva-1-SNAPSHOT.jar"]
+CMD ["java", "--add-opens=java.base/java.lang=ALL-UNNAMED", "-Xms2048m", "-Xmx2048m", "-XX:+UseG1GC","-jar", "conviva-1-SNAPSHOT.jar"]
