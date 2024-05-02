@@ -53,4 +53,19 @@ images on release page.
 ```
 docker build . -t conviva-bot
 docker run -it --rm --name conviva-bot conviva-bot
+
 ```
+
+## Usage
+
+Create a file `conviva.properties` on your host machine including all the details and configurations for the bot.  
+Then run the docker container and mount the properties file into the container.  
+You can also link the host timezone configuration to have a matching timezone inside the container.
+
+Additionally, you should add the `--java-opens` flag to allow deep reflections for the IoC and as well provide some
+information for garbage collection and resource limits.
+
+````
+docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot java --add-opens=java.base/java.lang=ALL-UNNAMED -Xms2048m -Xmx2048m -XX:+UseG1GC -jar conviva-1-SNAPSHOT.jar
+docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot java --add-opens=java.base/java.lang=ALL-UNNAMED -Xms2048m -Xmx2048m -XX:+UseG1GC -jar conviva-1-SNAPSHOT.jar
+````

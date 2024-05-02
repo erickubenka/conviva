@@ -12,7 +12,6 @@ RUN apt-get -y install chromium-driver
 
 RUN mkdir -p /app
 COPY ./build/libs/conviva-1-SNAPSHOT.jar /app/conviva-1-SNAPSHOT.jar
-COPY ./build/libs/conviva.properties /app/conviva.properties
 WORKDIR /app
 
 # https://medium.com/@anurag2397/solving-javas-core-problems-around-memory-and-cpu-4d0c97748c43
