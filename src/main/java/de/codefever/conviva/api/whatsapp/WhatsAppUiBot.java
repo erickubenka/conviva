@@ -135,6 +135,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         this.messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES);
         this.messages = filterMessages(this.messages);
         this.messages.sort(Comparator.comparing(Message::getDateTime));
+        this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
 
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
@@ -156,10 +157,16 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         while (!stop) {
             // sort
             this.messages.sort(Comparator.comparing(Message::getDateTime));
+            List<Message> newMessages = null;
 
-            List<Message> newMessages = new ArrayList<>();
             try {
-                newMessages = chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES);
+                final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
+                if (message != null && !this.messages.isEmpty() && message.getDateTime().isAfter(this.messages.get(this.messages.size() - 1).getDateTime())) {
+                    newMessages = chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES);
+                } else {
+                    log().info("No new messages found.");
+                }
+
                 // break loop detection, so we have to go for a double class iniet to break buffer
                 PAGE_FACTORY.createPage(HomePage.class);
                 chatPage = PAGE_FACTORY.createPage(ChatPage.class);
@@ -167,56 +174,56 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 log().error("Error while getting messages: {}", e.getMessage());
             }
 
-            for (Message newMessage : newMessages) {
-                if (!messages.contains(newMessage)) {
+            if (newMessages != null) {
+                for (Message newMessage : newMessages) {
+                    if (!messages.contains(newMessage)) {
+                        // add new message to history
+                        messages.add(newMessage);
+                        log().info("Added message to list: {}", newMessage.getMessage());
+                        if (newMessage.getDateTime().isAfter(startTime)) {
+                            for (final BotCommand command : this.commands) {
+                                // check for registered commands and run.
+                                if (newMessage.getMessage().trim().toLowerCase().equals(command.command())) {
 
-                    // add new message to history
-                    messages.add(newMessage);
-                    log().info("Added message to list: {}", newMessage.getMessage());
+                                    // StopCommand extra definition
+                                    if (command instanceof StopCommand) {
+                                        stop = true;
+                                    }
 
-                    if (newMessage.getDateTime().isAfter(startTime)) {
-                        for (final BotCommand command : this.commands) {
-                            // check for registered commands and run.
-                            if (newMessage.getMessage().trim().toLowerCase().equals(command.command())) {
+                                    ChatPage finalChatPage = chatPage;
+                                    Thread thread = new Thread(() -> {
+                                        log().info("Running Thread: {}", Thread.currentThread().getName());
 
-                                // StopCommand extra definition
-                                if (command instanceof StopCommand) {
-                                    stop = true;
+                                        // anything to say before run a potential hevy-load command?
+                                        if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
+                                            sendMessage(finalChatPage, command.beforeMessage());
+                                        }
+
+                                        // run command
+                                        final String commandOutput = command.run(filterMessages(messages));
+                                        sendMessage(finalChatPage, command.outputIdentifier() + "\n" + commandOutput);
+
+                                        // anything to say after this command?
+                                        if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
+                                            sendMessage(finalChatPage, command.afterMessage());
+                                        }
+                                    });
+
+                                    thread.setName(command.command());
+                                    thread.start();
+
+                                    // exit for loop when command found early.
+                                    break;
                                 }
-
-                                ChatPage finalChatPage = chatPage;
-                                Thread thread = new Thread(() -> {
-                                    log().info("Running Thread: {}", Thread.currentThread().getName());
-
-                                    // anything to say before run a potential hevy-load command?
-                                    if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
-                                        sendMessage(finalChatPage, command.beforeMessage());
-                                    }
-
-                                    // run command
-                                    final String commandOutput = command.run(filterMessages(messages));
-                                    sendMessage(finalChatPage, command.outputIdentifier() + "\n" + commandOutput);
-
-                                    // anything to say after this command?
-                                    if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
-                                        sendMessage(finalChatPage, command.afterMessage());
-                                    }
-                                });
-
-                                thread.setName(command.command());
-                                thread.start();
-
-                                // exit for loop when command found early.
-                                break;
                             }
-                        }
 
-                        // highlight - todo - for future commands
-                        if (newMessage.getMessage().contains("@" + BOT_NAME)) {
-                            log().info("Highlight: {}", newMessage.getMessage());
+                            // highlight - todo - for future commands
+                            if (newMessage.getMessage().contains("@" + BOT_NAME)) {
+                                log().info("Highlight: {}", newMessage.getMessage());
+                            }
+                        } else {
+                            log().info("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
                         }
-                    } else {
-                        log().info("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
                     }
                 }
             }
@@ -225,7 +232,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             log().info(JVMMonitor.getJVMUsageInfo());
             log().info("Messages in cache: {}", messages.size());
-            TimerUtils.sleep(250);
         }
     }
 
@@ -267,15 +273,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      * @param message  {@link Message} to send.
      * @return Refreshed {@link ChatPage} instance of the chat the bot joined.
      */
-    private synchronized ChatPage sendMessage(ChatPage chatPage, final String message) {
+    private synchronized ChatPage sendMessage(final ChatPage chatPage, final String message) {
 
         if (DEBUG) {
             log().info("DEBUG: " + message);
             return chatPage;
         }
 
-        chatPage = chatPage.sendMessage(message);
-        return chatPage;
+        return chatPage.sendMessage(message);
     }
 
     /**

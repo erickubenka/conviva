@@ -166,7 +166,7 @@ public class ChatPage extends HomePage {
      *
      * @return {@link Message}
      */
-    private Message firstMessageOfList() {
+    public Message firstMessageOfList() {
         final UiElement messageElement = find(By.cssSelector("div.message-in div.copyable-text"));
         final Message message = this.parseMessageFromUi(messageElement);
 
@@ -176,6 +176,16 @@ public class ChatPage extends HomePage {
 
         final UiElement messageElementOut = find(By.cssSelector("div.message-out div.copyable-text"));
         return this.parseMessageFromUi(messageElementOut);
+    }
+
+    /**
+     * Returns the last message of the list
+     *
+     * @param includeOwnMessages {@link Boolean}
+     * @return {@link Message}
+     */
+    public Message lastMessageOfList(final boolean includeOwnMessages) {
+        return this.visibleMessages(1, false).get(0);
     }
 
     /**
