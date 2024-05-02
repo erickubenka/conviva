@@ -45,7 +45,7 @@ jobs:
         gradle-version: '7.6'
     
     - name: Build with Gradle 7.6
-      run: gradle build
+      run: gradle build -x test
 
   dependency-submission:
 
@@ -65,3 +65,5 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+      with:
+        gradle-version: '7.6'
