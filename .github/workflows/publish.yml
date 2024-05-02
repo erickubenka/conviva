@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read/write
 
     steps:
     - uses: actions/checkout@v4
@@ -37,5 +38,5 @@ jobs:
     - name: Publish to GitHub Packages
       run: gradle publish -x test
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
