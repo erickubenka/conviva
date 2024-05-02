@@ -32,7 +32,7 @@ public class ConnectWithNumberPage extends Page {
      * @param phoneNumber {@link String}
      * @return {@link PhoneNumberVerificationPage}
      */
-    public PhoneNumberVerificationPage connectWithNumber(String phoneNumber) {
+    public PhoneNumberVerificationPage connectWithNumber(final String phoneNumber) {
         inputPhoneNumber.sendKeys(phoneNumber);
         buttonNext.click();
         return createPage(PhoneNumberVerificationPage.class);
@@ -44,7 +44,7 @@ public class ConnectWithNumberPage extends Page {
      * @param country {@link String}
      * @return {@link ConnectWithNumberPage}
      */
-    public ConnectWithNumberPage selectCountry(String country) {
+    public ConnectWithNumberPage selectCountry(final String country) {
         selectCountryButton.click();
 
         final UiElement searchCountryInput = find(By.xpath("//span[@data-icon='search']/../..//div[@role='textbox']"));

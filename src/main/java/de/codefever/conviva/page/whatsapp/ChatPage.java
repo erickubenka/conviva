@@ -40,7 +40,7 @@ public class ChatPage extends HomePage {
      * @param message {@link String}
      * @return {@link ChatPage}
      */
-    public synchronized ChatPage sendMessage(String message) {
+    public synchronized ChatPage sendMessage(final String message) {
 
         CONTROL.retryTimes(3, () -> {
             this.inputChat.clear();
@@ -70,7 +70,7 @@ public class ChatPage extends HomePage {
      * @param count {@link Integer}
      * @return {@link List} of {@link Message}
      */
-    public List<Message> visibleMessages(int count, boolean includeOwnMessages) {
+    public List<Message> visibleMessages(final int count, final boolean includeOwnMessages) {
 
         final UiElement divMessageIn = find(By.cssSelector("div.message-in div.copyable-text"));
         final List<Message> messages = new ArrayList<>(this.readMessagesFromList(divMessageIn, count));
@@ -88,7 +88,7 @@ public class ChatPage extends HomePage {
      *
      * @return {@link List} of {@link Message}
      */
-    public List<Message> visibleMessages(boolean includeOwnMessages) {
+    public List<Message> visibleMessages(final boolean includeOwnMessages) {
         return this.visibleMessages(-1, includeOwnMessages);
     }
 
@@ -135,7 +135,7 @@ public class ChatPage extends HomePage {
      * @param messageDiv {@link UiElement}
      * @return {@link List} of {@link Message}
      */
-    private List<Message> readMessagesFromList(UiElement messageDiv, int count) {
+    private List<Message> readMessagesFromList(final UiElement messageDiv, int count) {
 
         final List<Message> messages = new ArrayList<>();
         if (messageDiv.expect().displayed().getActual()) {

@@ -29,7 +29,7 @@ public class HomePage extends Page {
      * @param title {@link String}
      * @return {@link ChatPage}
      */
-    public ChatPage openChat(String title) {
+    public ChatPage openChat(final String title) {
         chatList.find(By.xpath(".//span[@title='" + title + "']")).click();
         return createPage(ChatPage.class);
     }
