@@ -3,6 +3,7 @@ ext {
 }
 
 apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 group 'de.codefever.conviva'
 version '1-SNAPSHOT'
@@ -70,3 +71,15 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/erickubenka/conviva"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
