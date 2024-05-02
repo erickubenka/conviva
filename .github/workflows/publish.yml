@@ -8,9 +8,12 @@
 name: Gradle Package & Docker Build
 
 on:
-  release:
-    types: [created]
   workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
@@ -35,27 +38,53 @@ jobs:
     - name: Build with Gradle 7.6
       run: gradle jar
 
+    - name: Log into registry ${{ env.REGISTRY }}
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag conviva-bot:latest
 
-    - name: Package Docker
-      run: docker save conviva-bot:latest | gzip > conviva_bot_latest.tar.gz
+    - name: Extract Docker metadata
+      id: meta
+      uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-    - name: Upload Docker artifcats
-      uses: actions/upload-artifact@v4.3.3
+    # Build and push Docker image with Buildx (don't push on PR)
+    # https://github.com/docker/build-push-action
+    - name: Build and push Docker image
+      id: build-and-push
+      uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
       with:
-        name: docker-image
-        path: ./conviva_bot_latest.tar.gz
-        if-no-files-found: warn
-        retention-days: 1
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max 
+
+    #- name: Package Docker
+    #  run: docker save conviva-bot:latest | gzip > conviva_bot_latest.tar.gz
+
+    #- name: Upload Docker artifcats
+    #  uses: actions/upload-artifact@v4.3.3
+    #  with:
+    #    name: docker-image
+    #    path: ./conviva_bot_latest.tar.gz
+    #    if-no-files-found: warn
+    #    retention-days: 1
         
-    - name: Upload Build artifacts
-      uses: actions/upload-artifact@v4.3.3
-      with:
-        name: build-artifacts
-        path: ./build/libs/
-        if-no-files-found: warn
-        retention-days: 1
+    #- name: Upload Build artifacts
+    #  uses: actions/upload-artifact@v4.3.3
+    #  with:
+    #    name: build-artifacts
+    #    path: ./build/libs/
+    #    if-no-files-found: warn
+    #    retention-days: 1
 
     #- name: Publish to GitHub Packages
     #  run: gradle publish -x test
