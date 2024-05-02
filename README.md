@@ -62,6 +62,15 @@ Create a file `conviva.properties` on your host machine including all the detail
 Then run the docker container and mount the properties file into the container.  
 You can also link the host timezone configuration to have a matching timezone inside the container.
 
+### With image from GitHub Registry
+````bash
+# pull remote container
+docker pull ghcr.io/erickubenka/conviva:main
+docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot ghcr.io/erickubenka/conviva:main
 ````
+
+### With locally built image
+````bash
 docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot
 ````
+
