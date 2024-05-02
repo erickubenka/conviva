@@ -33,10 +33,32 @@ jobs:
         gradle-version: '7.6'
     
     - name: Build with Gradle 7.6
-      run: gradle build -x test
+      run: gradle jar
 
-    - name: Publish to GitHub Packages
-      run: gradle publish -x test
-      env:
-        GITHUB_ACTOR: ${{ github.actor }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag conviva-bot:latest
+
+    - name: Package Docker
+      run: docker save conviva-bot:latest | gzip > conviva_bot_latest.tar.gz
+
+    - name: Upload Docker artifcats
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: docker-image
+        path: ./conviva_bot_latest.tar.gz
+        if-no-files-found: warn
+        retention-days: 1
+        
+    - name: Upload Build artifacts
+      uses: actions/upload-artifact@v4.3.3
+      with:
+        name: build-artifacts
+        path: ./build/libs/
+        if-no-files-found: warn
+        retention-days: 1
+
+    #- name: Publish to GitHub Packages
+    #  run: gradle publish -x test
+    #  env:
+    #    GITHUB_ACTOR: ${{ github.actor }}
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
