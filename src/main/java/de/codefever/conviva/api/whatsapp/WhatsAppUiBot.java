@@ -236,8 +236,17 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      */
     private ChatPage performLogin() {
 
-        final LoginPage loginPage = PAGE_FACTORY.createPage(LoginPage.class);
+        if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable")) {
+            log().info("Using persistent user data directory: {}. Try to instantiate HomePage instead of LoginPage", PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path"));
+            try {
+                final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class);
+                return homePage.openChat(this.chatName);
+            } catch (Exception e) {
+                log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage());
+            }
+        }
 
+        final LoginPage loginPage = PAGE_FACTORY.createPage(LoginPage.class);
         if (PROPERTY_MANAGER.getProperty("conviva.auth.mode").equals("phone")) {
             ConnectWithNumberPage connectWithNumberPage = loginPage.goToConnectWithNumberPage();
             connectWithNumberPage = connectWithNumberPage.selectCountry(PROPERTY_MANAGER.getProperty("conviva.auth.phone.country"));

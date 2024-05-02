@@ -15,16 +15,29 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
     public static void main(String[] args) {
 
         JVMMonitor.start();
+        PROPERTY_MANAGER.loadProperties("conviva.properties");
+
         WEB_DRIVER_MANAGER.setUserAgentConfig(Browsers.chromeHeadless, new ChromeConfig() {
             @Override
             public void configure(ChromeOptions options) {
                 options.addArguments("--disable-dev-shm-usage");
                 // https://github.com/puppeteer/puppeteer/issues/1914
                 options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.91 Safari/537.36");
+                if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable", false)) {
+                    options.addArguments("--user-data-dir=" + PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path", "/tmp/.conviva/"));
+                }
             }
         });
 
-        PROPERTY_MANAGER.loadProperties("conviva.properties");
+        WEB_DRIVER_MANAGER.setUserAgentConfig(Browsers.chrome, new ChromeConfig() {
+            @Override
+            public void configure(ChromeOptions options) {
+                if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable", false)) {
+                    options.addArguments("--user-data-dir=" + PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path", "/tmp/.conviva/"));
+                }
+            }
+        });
+
 //        ChromeDriver chromeDriver = WEB_DRIVER_MANAGER.unwrapWebDriver(WEB_DRIVER_MANAGER.getWebDriver(), ChromeDriver.class).get();
 //        DevTools devTools = chromeDriver.getDevTools();
 //        devTools.createSession();
