@@ -15,19 +15,24 @@ import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
+import eu.tsystems.mms.tic.testframework.common.Testerra;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
+import eu.tsystems.mms.tic.testframework.report.model.context.ExecutionContext;
+import eu.tsystems.mms.tic.testframework.report.model.context.LogMessage;
+import eu.tsystems.mms.tic.testframework.report.utils.IExecutionContextController;
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
-import org.openqa.selenium.WebDriver;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -251,7 +256,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             this.webDriverUUID = commandOutput;
                                             commandOutput = "";
                                         }
-                                        sendMessage(command.outputIdentifier() + "\n" + commandOutput);
+
+                                        if (commandOutput != null && !commandOutput.isEmpty()) {
+                                            sendMessage(command.outputIdentifier() + "\n" + commandOutput);
+                                        }
 
                                         // anything to say after this command?
                                         if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
@@ -278,8 +286,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             // cleanup
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             threads.removeIf(thread -> !thread.isAlive());
-            log().info(JVMMonitor.getJVMUsageInfo());
-            log().info("Messages in cache: {}", messages.size());
+            cleanUpLogs();
+            log().info("Messages: {} JVM: {}", messages.size(), JVMMonitor.getJVMUsageInfo());
         }
     }
 
@@ -334,5 +342,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         }).collect(Collectors.toList());
     }
 
-
+    private void cleanUpLogs() {
+        try {
+            final ExecutionContext executionContext = Testerra.getInjector().getInstance(IExecutionContextController.class).getExecutionContext();
+            final Field methodContextLessLogs = executionContext.getClass().getDeclaredField("methodContextLessLogs");
+            methodContextLessLogs.setAccessible(true);
+            ((ConcurrentLinkedQueue<LogMessage>) methodContextLessLogs.get(executionContext)).clear();
+        } catch (Exception e) {
+            log().error("Error while cleaning up logs: {}", e.getMessage());
+        }
+    }
 }

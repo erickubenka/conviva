@@ -10,6 +10,7 @@ import eu.tsystems.mms.tic.testframework.useragents.ChromeConfig;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 
+
 public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverManagerProvider {
 
     public static void main(String[] args) {

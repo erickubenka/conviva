@@ -35,7 +35,9 @@ public class HelpCommand implements BotCommand {
 
         final StringBuilder output = new StringBuilder("Folgende Befehle sind verfügbar:");
         for (final BotCommand command : availableCommands) {
-            output.append("\n").append(command.command()).append(" - ").append(command.description());
+            if (command.isPublic()) {
+                output.append("\n").append(command.command()).append(" - ").append(command.description());
+            }
         }
 
         return output.toString();

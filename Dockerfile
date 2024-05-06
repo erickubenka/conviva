@@ -14,5 +14,6 @@ RUN mkdir -p /app
 COPY ./build/libs/conviva-1-SNAPSHOT.jar /app/conviva-1-SNAPSHOT.jar
 WORKDIR /app
 
+#CMD ["java", "--add-opens=java.base/java.lang=ALL-UNNAMED", "-Xms2048m", "-Xmx2048m", "-verbose:gc", "-jar", "conviva-1-SNAPSHOT.jar"]
 # https://medium.com/@anurag2397/solving-javas-core-problems-around-memory-and-cpu-4d0c97748c43
 CMD ["java", "--add-opens=java.base/java.lang=ALL-UNNAMED", "-Xms2048m", "-Xmx2048m", "-XX:+UseG1GC", "-verbose:gc", "-jar", "conviva-1-SNAPSHOT.jar"]

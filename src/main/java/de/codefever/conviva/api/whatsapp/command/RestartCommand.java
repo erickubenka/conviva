@@ -28,7 +28,7 @@ public class RestartCommand implements BotCommand, WebDriverManagerProvider, Pag
 
     @Override
     public String outputIdentifier() {
-        return "###RESTART###";
+        return "";
     }
 
     @Override
@@ -44,12 +44,12 @@ public class RestartCommand implements BotCommand, WebDriverManagerProvider, Pag
 
     @Override
     public String beforeMessage() {
-        return "###RESTART IN PROCESS###";
+        return "";
     }
 
     @Override
     public String afterMessage() {
-        return "###RESTART DONE###";
+        return "";
     }
 
     @Override

@@ -74,3 +74,10 @@ docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -
 docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot
 ````
 
+Currently, the bot somehow tries to allocate a lot of memory during its execution. To avoid a stuck bot, you can go for the restart and memory limit options.  
+This will restart the bot if more than 3GB of memory is used by the container.
+
+```
+docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro -m 3125m --restart always --name conviva-bot ghcr.io/erickubenka/conviva:main
+```
+
