@@ -3,28 +3,29 @@ package de.codefever.conviva.api.whatsapp;
 import de.codefever.conviva.api.whatsapp.command.BotCommand;
 import de.codefever.conviva.api.whatsapp.command.BugCommand;
 import de.codefever.conviva.api.whatsapp.command.HelpCommand;
+import de.codefever.conviva.api.whatsapp.command.RestartCommand;
 import de.codefever.conviva.api.whatsapp.command.StatusCommand;
 import de.codefever.conviva.api.whatsapp.command.StopCommand;
 import de.codefever.conviva.api.whatsapp.command.SummaryCommand;
 import de.codefever.conviva.api.whatsapp.command.SupCommand;
 import de.codefever.conviva.api.whatsapp.command.TldrCommand;
 import de.codefever.conviva.api.whatsapp.command.TopPostCommand;
+import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
 import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
-import de.codefever.conviva.page.whatsapp.ConnectWithNumberPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
-import de.codefever.conviva.page.whatsapp.LoginPage;
-import de.codefever.conviva.page.whatsapp.PhoneNumberVerificationPage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
+import org.openqa.selenium.WebDriver;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,6 +71,11 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     private final String chatName;
 
     /**
+     * UUID of the web driver.
+     */
+    private String webDriverUUID = null;
+
+    /**
      * Start time of the bot.
      */
     private final LocalDateTime startTime = LocalDateTime.now();
@@ -77,7 +83,12 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     /**
      * List of messages the bot has read.
      */
-    private List<Message> messages = new ArrayList<>();
+    private final List<Message> messages = Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * List of threads the bot has started.
+     */
+    private final List<Thread> threads = new ArrayList<>();
 
     /**
      * List of commands the bot can execute.
@@ -104,7 +115,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     public WhatsAppUiBot(final String chatName) {
         this.chatName = chatName;
         this.registerCommand(new StatusCommand(startTime));
-        this.registerCommand(new StopCommand(BOT_NAME));
+//        this.registerCommand(new StopCommand(BOT_NAME));
+        this.registerCommand(new RestartCommand(this.chatName));
         this.registerCommand(new SummaryCommand());
         this.registerCommand(new TldrCommand());
         this.registerCommand(new SupCommand());
@@ -118,8 +130,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      *
      * @param botCommand {@link BotCommand} to register.
      */
-    public void registerCommand(BotCommand botCommand) {
-        log().info("Successfully registered command: " + botCommand.command());
+    public void registerCommand(final BotCommand botCommand) {
+        log().info("Successfully registered command: {}", botCommand.command());
         this.commands.add(botCommand);
     }
 
@@ -129,25 +141,26 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     public void run() {
 
         log().info("Starting Bot {} in chat {} at {}.", BOT_NAME, chatName, startTime);
-        ChatPage chatPage = this.performLogin();
+        this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
 
-        // init messages
-        this.messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES);
-        this.messages = filterMessages(this.messages);
-        this.messages.sort(Comparator.comparing(Message::getDateTime));
+        ChatPage chatPage = new LoginWorkFlow(chatName, webDriverUUID).run();
+
+        // init messages and get rid of old stuff.
+        this.messages.addAll(chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES));
+        this.messages.removeIf(message -> filterMessages(messages).contains(message));
         this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+        this.messages.sort(Comparator.comparing(Message::getDateTime));
 
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
-        HomePage homePage = chatPage.createPage(HomePage.class);
-        chatPage = homePage.openChat(chatName);
+        chatPage = chatPage.createPage(HomePage.class).openChat(chatName);
         chatPage.scrollToBottom();
 
         // init done
-        log().info("Initialized. Current messages for today: " + messages.size());
+        log().info("Initialized. Current messages for today: {}", messages.size());
 
         if (!START_SILENT) {
-            this.sendMessage(chatPage, outputStart +
+            this.sendMessage(outputStart +
                     "\nHi, ich bin " + BOT_NAME + " und jetzt verfügbar." +
                     "\nIch kann dir " + filterMessages(this.messages).size() + " Nachrichten seit " + filterMessages(this.messages).get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. " +
                     "\nSchreibe !help für Hilfe.");
@@ -157,60 +170,94 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         while (!stop) {
             // sort
             this.messages.sort(Comparator.comparing(Message::getDateTime));
-            List<Message> newMessages = null;
+            List<Message> potentiallyNewMessages = null;
 
             try {
-                final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
-                if (message != null && !this.messages.isEmpty() && message.getDateTime().isAfter(this.messages.get(this.messages.size() - 1).getDateTime())) {
-                    newMessages = chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES);
-                } else {
-                    log().info("No new messages found.");
-                }
+                // break loop detection, so we have to go for a double class init to break buffer
+                PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
+                chatPage = PAGE_FACTORY.createPage(ChatPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
 
-                // break loop detection, so we have to go for a double class iniet to break buffer
-                PAGE_FACTORY.createPage(HomePage.class);
-                chatPage = PAGE_FACTORY.createPage(ChatPage.class);
+                // find last message and check if already in message list
+                // if we already know this message,s just continue
+                // if not, get last 5 messages to ensure we got everything that is possibly new.
+                final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
+                if (message != null && !this.messages.contains(message)) {
+                    potentiallyNewMessages = chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES);
+                } else {
+                    log().debug("No new messages found.");
+                }
             } catch (Exception e) {
                 log().error("Error while getting messages: {}", e.getMessage());
             }
 
-            if (newMessages != null) {
-                for (Message newMessage : newMessages) {
+            // if we have potentially new messages, check them
+            if (potentiallyNewMessages != null) {
+                for (final Message newMessage : potentiallyNewMessages) {
                     if (!messages.contains(newMessage)) {
-                        // add new message to history
                         messages.add(newMessage);
                         log().info("Added message to list: {}", newMessage.getMessage());
+
                         if (newMessage.getDateTime().isAfter(startTime)) {
                             for (final BotCommand command : this.commands) {
                                 // check for registered commands and run.
                                 if (newMessage.getMessage().trim().toLowerCase().equals(command.command())) {
 
-                                    // StopCommand extra definition
-                                    if (command instanceof StopCommand) {
-                                        stop = true;
+                                    // threaded commands ...
+                                    if (command.isRunInThread()) {
+                                        final Thread thread = new Thread(() -> {
+                                            log().info("Running Thread: {}", Thread.currentThread().getName());
+
+                                            // anything to say before run a potential heavy-load command?
+                                            if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
+                                                sendMessage(command.beforeMessage());
+                                            }
+
+                                            // run command
+                                            final String commandOutput = command.run(filterMessages(messages));
+                                            sendMessage(command.outputIdentifier() + "\n" + commandOutput);
+
+                                            // anything to say after this command?
+                                            if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
+                                                sendMessage(command.afterMessage());
+                                            }
+                                        });
+
+                                        thread.setName(command.command());
+                                        threads.add(thread);
+                                        thread.start();
                                     }
 
-                                    ChatPage finalChatPage = chatPage;
-                                    Thread thread = new Thread(() -> {
-                                        log().info("Running Thread: {}", Thread.currentThread().getName());
+                                    // non-threaded commands like restart, stop, etc.
+                                    if (!command.isRunInThread()) {
 
-                                        // anything to say before run a potential hevy-load command?
+                                        while (threads.stream().anyMatch(Thread::isAlive)) {
+                                            TimerUtils.sleep(1000, "Waiting for other threads to finish.");
+                                        }
+
+                                        // StopCommand extra definition
+                                        if (command instanceof StopCommand) {
+                                            stop = true;
+                                        }
+
+                                        // anything to say before run a potential heavy-load command?
                                         if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
-                                            sendMessage(finalChatPage, command.beforeMessage());
+                                            sendMessage(command.beforeMessage());
                                         }
 
                                         // run command
-                                        final String commandOutput = command.run(filterMessages(messages));
-                                        sendMessage(finalChatPage, command.outputIdentifier() + "\n" + commandOutput);
+                                        String commandOutput = command.run(filterMessages(messages));
+                                        // RestartCommand extra definition
+                                        if (command instanceof RestartCommand) {
+                                            this.webDriverUUID = commandOutput;
+                                            commandOutput = "";
+                                        }
+                                        sendMessage(command.outputIdentifier() + "\n" + commandOutput);
 
                                         // anything to say after this command?
                                         if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
-                                            sendMessage(finalChatPage, command.afterMessage());
+                                            sendMessage(command.afterMessage());
                                         }
-                                    });
-
-                                    thread.setName(command.command());
-                                    thread.start();
+                                    }
 
                                     // exit for loop when command found early.
                                     break;
@@ -222,7 +269,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                 log().info("Highlight: {}", newMessage.getMessage());
                             }
                         } else {
-                            log().info("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
+                            log().debug("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
                         }
                     }
                 }
@@ -230,38 +277,9 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
             // cleanup
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+            threads.removeIf(thread -> !thread.isAlive());
             log().info(JVMMonitor.getJVMUsageInfo());
             log().info("Messages in cache: {}", messages.size());
-        }
-    }
-
-    /**
-     * Perform the login process based on specified options.
-     *
-     * @return {@link ChatPage} instance of the chat the bot joined.
-     */
-    private ChatPage performLogin() {
-
-        if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable")) {
-            log().info("Using persistent user data directory: {}. Try to instantiate HomePage instead of LoginPage", PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path"));
-            try {
-                final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class);
-                return homePage.openChat(this.chatName);
-            } catch (Exception e) {
-                log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage());
-            }
-        }
-
-        final LoginPage loginPage = PAGE_FACTORY.createPage(LoginPage.class);
-        if (PROPERTY_MANAGER.getProperty("conviva.auth.mode").equals("phone")) {
-            ConnectWithNumberPage connectWithNumberPage = loginPage.goToConnectWithNumberPage();
-            connectWithNumberPage = connectWithNumberPage.selectCountry(PROPERTY_MANAGER.getProperty("conviva.auth.phone.country"));
-            PhoneNumberVerificationPage phoneNumberVerificationPage = connectWithNumberPage.connectWithNumber(PROPERTY_MANAGER.getProperty("conviva.auth.phone.number"));
-            final HomePage homePage = phoneNumberVerificationPage.waitForNumberVerified();
-            return homePage.openChat(this.chatName);
-        } else {
-            final HomePage homePage = loginPage.waitForQrCodeScanned();
-            return homePage.openChat(this.chatName);
         }
     }
 
@@ -269,14 +287,15 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      * Send a message to the chat.
      * Must be synchronized because sendMessage input can only be used once at a time.
      *
-     * @param chatPage {@link ChatPage} instance of the chat the bot joined.
-     * @param message  {@link Message} to send.
+     * @param message {@link Message} to send.
      * @return Refreshed {@link ChatPage} instance of the chat the bot joined.
      */
-    private synchronized ChatPage sendMessage(final ChatPage chatPage, final String message) {
+    private synchronized ChatPage sendMessage(final String message) {
+
+        final ChatPage chatPage = PAGE_FACTORY.createPage(ChatPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
 
         if (DEBUG) {
-            log().info("DEBUG: " + message);
+            log().info("DEBUG: {}", message);
             return chatPage;
         }
 
@@ -314,4 +333,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             return true;
         }).collect(Collectors.toList());
     }
+
+
 }

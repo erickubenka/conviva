@@ -37,7 +37,7 @@ public interface BotCommand extends Loggable {
      * @param messages {@link List} of {@link Message}
      * @return {@link String}
      */
-    String run(List<Message> messages);
+    String run(final List<Message> messages);
 
     /**
      * Message that should be sent to the chat before executing the command
@@ -52,4 +52,19 @@ public interface BotCommand extends Loggable {
      * @return {@link String}
      */
     String afterMessage();
+
+    /**
+     * Determines if this command is available in !help
+     *
+     * @return {@link boolean}
+     */
+    boolean isPublic();
+
+    /**
+     * Determines if this command should be executed in a separate thread
+     *
+     * @return {@link boolean}
+     */
+    boolean isRunInThread();
+
 }

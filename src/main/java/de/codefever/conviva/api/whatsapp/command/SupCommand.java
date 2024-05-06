@@ -27,7 +27,7 @@ public class SupCommand implements BotCommand {
     }
 
     @Override
-    public String run(List<Message> messages) {
+    public String run(final List<Message> messages) {
 
         final SupPrompt prompt = new SupPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());
@@ -44,5 +44,15 @@ public class SupCommand implements BotCommand {
     @Override
     public String afterMessage() {
         return "";
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return true;
     }
 }

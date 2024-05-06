@@ -31,11 +31,10 @@ public class HelpCommand implements BotCommand {
     }
 
     @Override
-    public String run(List<Message> messages) {
+    public String run(final List<Message> messages) {
 
         final StringBuilder output = new StringBuilder("Folgende Befehle sind verfügbar:");
-        output.append("\n").append(command()).append(" - ").append(description());
-        for (BotCommand command : availableCommands) {
+        for (final BotCommand command : availableCommands) {
             output.append("\n").append(command.command()).append(" - ").append(command.description());
         }
 
@@ -50,5 +49,15 @@ public class HelpCommand implements BotCommand {
     @Override
     public String afterMessage() {
         return "";
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return true;
     }
 }

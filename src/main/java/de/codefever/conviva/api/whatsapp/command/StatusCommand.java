@@ -13,7 +13,7 @@ public class StatusCommand implements BotCommand {
 
     private final LocalDateTime startTime;
 
-    public StatusCommand(LocalDateTime startTime) {
+    public StatusCommand(final LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
@@ -33,7 +33,7 @@ public class StatusCommand implements BotCommand {
     }
 
     @Override
-    public String run(List<Message> messages) {
+    public String run(final List<Message> messages) {
         return "Online seit " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + ". " +
                 "\nIch kann dir " + messages.size() + " Nachrichten seit " + messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. ";
     }
@@ -46,6 +46,16 @@ public class StatusCommand implements BotCommand {
     @Override
     public String afterMessage() {
         return "";
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return true;
     }
 
 }

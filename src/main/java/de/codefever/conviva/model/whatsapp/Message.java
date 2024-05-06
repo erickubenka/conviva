@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 /**
  * Represents a message in a WhatsApp chat.
@@ -95,5 +96,10 @@ public class Message implements PropertyManagerProvider {
                 ", message='" + message + '\'' +
                 ", dateTime=" + dateTime +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message, dateTime);
     }
 }

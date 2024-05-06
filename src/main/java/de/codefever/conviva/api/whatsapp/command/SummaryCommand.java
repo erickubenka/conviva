@@ -45,4 +45,14 @@ public class SummaryCommand implements BotCommand {
     public String afterMessage() {
         return "";
     }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return true;
+    }
 }

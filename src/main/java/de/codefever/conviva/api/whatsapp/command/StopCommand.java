@@ -2,6 +2,7 @@ package de.codefever.conviva.api.whatsapp.command;
 
 import de.codefever.conviva.model.whatsapp.Message;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
+import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class StopCommand implements BotCommand, WebDriverManagerProvider {
 
     private final String botName;
 
-    public StopCommand(String botName) {
+    public StopCommand(final String botName) {
         this.botName = botName;
     }
 
@@ -32,7 +33,8 @@ public class StopCommand implements BotCommand, WebDriverManagerProvider {
     }
 
     @Override
-    public String run(List<Message> messages) {
+    public String run(final List<Message> messages) {
+        TimerUtils.sleep(3000);
         WEB_DRIVER_MANAGER.shutdownAllSessions();
         System.exit(0);
         return "";
@@ -47,5 +49,15 @@ public class StopCommand implements BotCommand, WebDriverManagerProvider {
     @Override
     public String afterMessage() {
         return "";
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return false;
     }
 }
