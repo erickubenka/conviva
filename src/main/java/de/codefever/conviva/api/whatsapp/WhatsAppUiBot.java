@@ -147,7 +147,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
         // init messages and get rid of old stuff.
         this.messages.addAll(chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES));
-        this.messages.removeIf(message -> filterMessages(messages).contains(message));
+        this.messages.removeIf(message -> !filterMessages(messages).contains(message));
         this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
         this.messages.sort(Comparator.comparing(Message::getDateTime));
 
