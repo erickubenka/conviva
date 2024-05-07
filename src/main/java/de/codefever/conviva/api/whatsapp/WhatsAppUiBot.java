@@ -217,8 +217,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             }
 
                                             // run command
-                                            final String commandOutput = command.run(filterMessages(messages));
-                                            sendMessage(command.outputIdentifier() + "\n" + commandOutput);
+                                            final String commandOutput = command.run(filterMessages(this.messages));
+                                            if (commandOutput != null && !commandOutput.isEmpty()) {
+                                                sendMessage(command.outputIdentifier() + "\n" + commandOutput);
+                                            }
 
                                             // anything to say after this command?
                                             if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
@@ -249,7 +251,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                         }
 
                                         // run command
-                                        String commandOutput = command.run(filterMessages(messages));
+                                        String commandOutput = command.run(this.filterMessages(this.messages));
                                         // RestartCommand extra definition
                                         if (command instanceof RestartCommand) {
                                             this.webDriverUUID = commandOutput;
@@ -315,12 +317,20 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      * @param unfilteredList of {@link Message}
      * @return filtered list of {@link Message}
      */
-    private List<Message> filterMessages(final List<Message> unfilteredList) {
+    private synchronized List<Message> filterMessages(final List<Message> unfilteredList) {
+
+        final List<Message> filteredList = new ArrayList<>();
 
         final List<String> messagePartsToIgnore = new ArrayList<>();
         commands.forEach(command -> {
-            messagePartsToIgnore.add(command.outputIdentifier());
-            messagePartsToIgnore.add(command.command());
+
+            if (command.outputIdentifier() != null && !command.outputIdentifier().isEmpty()) {
+                messagePartsToIgnore.add(command.outputIdentifier());
+            }
+
+            if (command.command() != null && !command.command().isEmpty()) {
+                messagePartsToIgnore.add(command.command());
+            }
 
             if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
                 messagePartsToIgnore.add(command.beforeMessage());

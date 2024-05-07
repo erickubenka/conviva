@@ -229,6 +229,9 @@ public class ChatPage extends HomePage {
         } catch (UiElementAssertionError e) {
             log().error("UiElementAssertionError: {}", messageElement);
         }
+        catch (IndexOutOfBoundsException e){
+            log().error("IndexOutOfBoundsException: {}", messageElement);
+        }
 
         return null;
     }

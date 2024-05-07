@@ -27,7 +27,7 @@ public class SummaryCommand implements BotCommand {
     }
 
     @Override
-    public String run(List<Message> messages) {
+    public String run(final List<Message> messages) {
 
         final SummaryPrompt prompt = new SummaryPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());

@@ -16,7 +16,7 @@ public class SupPrompt implements Prompt {
     private static final String SYSTEM_PROMPT = "Du bist ein Assistent, welcher mir den Inhalt von Chatverläufen themenbasierend zusammenfasst und gruppiert.";
     private static final String USER_PROMPT = "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginns des Themas aus: \"ab dd.MM.yyyy hh:mm Uhr\".";
 
-    public SupPrompt(List<Message> messages) {
+    public SupPrompt(final List<Message> messages) {
         this.messages = messages;
     }
 
