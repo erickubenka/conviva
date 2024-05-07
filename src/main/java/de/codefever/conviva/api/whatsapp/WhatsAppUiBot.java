@@ -166,7 +166,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         if (!START_SILENT) {
             this.sendMessage(outputStart +
                     "\nHi, ich bin " + BOT_NAME + " und jetzt verfügbar." +
-                    "\nIch kann dir " + filterMessages(this.messages).size() + " Nachrichten seit " + filterMessages(this.messages).get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. " +
+                    "\nIch kann dir " + filterMessages().size() + " Nachrichten seit " + filterMessages().get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. " +
                     "\nSchreibe !help für Hilfe.");
         }
 
@@ -217,7 +217,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             }
 
                                             // run command
-                                            final String commandOutput = command.run(filterMessages(this.messages));
+                                            final String commandOutput = command.run(this.filterMessages());
                                             if (commandOutput != null && !commandOutput.isEmpty()) {
                                                 sendMessage(command.outputIdentifier() + "\n" + commandOutput);
                                             }
@@ -251,7 +251,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                         }
 
                                         // run command
-                                        String commandOutput = command.run(this.filterMessages(this.messages));
+                                        String commandOutput = command.run(this.filterMessages());
                                         // RestartCommand extra definition
                                         if (command instanceof RestartCommand) {
                                             this.webDriverUUID = commandOutput;
@@ -314,12 +314,9 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     /**
      * Filter messages based on registered commands to avoid sending them to other APIs
      *
-     * @param unfilteredList of {@link Message}
-     * @return filtered list of {@link Message}
+     * @return filtered list of {@link Message} that currently stored for this instance
      */
-    private synchronized List<Message> filterMessages(final List<Message> unfilteredList) {
-
-        final List<Message> filteredList = new ArrayList<>();
+    private synchronized List<Message> filterMessages() {
 
         final List<String> messagePartsToIgnore = new ArrayList<>();
         commands.forEach(command -> {
@@ -341,14 +338,16 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             }
         });
 
-        return unfilteredList.stream().filter(message -> {
-            for (final String part : messagePartsToIgnore) {
-                if (message.getMessage().contains(part)) {
-                    return false;
+        synchronized (this.messages) {
+            return this.messages.stream().filter(message -> {
+                for (final String part : messagePartsToIgnore) {
+                    if (message.getMessage().contains(part)) {
+                        return false;
+                    }
                 }
-            }
-            return true;
-        }).collect(Collectors.toList());
+                return true;
+            }).collect(Collectors.toList());
+        }
     }
 
     private void cleanUpLogs() {
