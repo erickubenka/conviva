@@ -29,7 +29,7 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
                 final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 return homePage.openChat(this.chatName);
             } catch (Exception e) {
-                log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage());
+                log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage(), e);
             }
         }
 

@@ -25,9 +25,9 @@ public class ChatPage extends HomePage {
 
 
     @Check
-    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @title = 'Gib eine Nachricht ein.']"));
+    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @aria-label = 'Gib eine Nachricht ein.']"));
 
-    private final UiElement buttonSend = find(By.xpath("//button[@aria-label='Senden']")); //
+    private final UiElement buttonSend = find(By.xpath("//span[@data-icon='send']/..")); //
 
     public ChatPage(WebDriver webDriver) {
         super(webDriver);
