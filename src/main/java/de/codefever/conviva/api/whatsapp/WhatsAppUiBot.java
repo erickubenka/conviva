@@ -16,6 +16,7 @@ import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.common.Testerra;
+import eu.tsystems.mms.tic.testframework.internal.Timings;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
 import eu.tsystems.mms.tic.testframework.report.model.context.ExecutionContext;
@@ -288,7 +289,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             threads.removeIf(thread -> !thread.isAlive());
             cleanUpLogs();
-            log().info("Messages: {}    JVM: {}", messages.size(), JVMMonitor.getJVMUsageInfo());
+            final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+            final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+
+            log().info("Messages: {}    TotalMem: {}    FreeMem: {}     UsedMem: {}",
+                    messages.size(),
+                    totalMem,
+                    freeMem,
+                    totalMem - freeMem);
         }
     }
 
@@ -353,11 +361,21 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     private void cleanUpLogs() {
         try {
             final ExecutionContext executionContext = Testerra.getInjector().getInstance(IExecutionContextController.class).getExecutionContext();
-            final Field methodContextLessLogs = executionContext.getClass().getDeclaredField("methodContextLessLogs");
-            methodContextLessLogs.setAccessible(true);
-            ((ConcurrentLinkedQueue<LogMessage>) methodContextLessLogs.get(executionContext)).clear();
+            synchronized (executionContext) {
+                final Field methodContextLessLogs = executionContext.getClass().getDeclaredField("methodContextLessLogs");
+                methodContextLessLogs.setAccessible(true);
+                ((ConcurrentLinkedQueue<LogMessage>) methodContextLessLogs.get(executionContext)).clear();
+            }
         } catch (Exception e) {
             log().error("Error while cleaning up logs: {}", e.getMessage());
+        }
+
+        synchronized (Timings.TIMING_GUIELEMENT_FIND_WITH_PARENT) {
+            Timings.TIMING_GUIELEMENT_FIND_WITH_PARENT.clear();
+        }
+
+        synchronized (Timings.TIMING_GUIELEMENT_FIND) {
+            Timings.TIMING_GUIELEMENT_FIND.clear();
         }
     }
 }

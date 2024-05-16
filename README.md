@@ -60,21 +60,26 @@ docker run -it --rm --name conviva-bot conviva-bot
 
 Create a file `conviva.properties` on your host machine including all the details and configurations for the bot.  
 Then run the docker container and mount the properties file into the container.  
-You can also link the host timezone configuration to have a matching timezone inside the container.
+You can also link the host timezone configuration to have a matching timezone inside the container.  
+You can link the userdata folder as well to have a persistent chrome browser profile across multiple container
+restarts without use of login again and again.
 
 ### With image from GitHub Registry
+
 ````bash
 # pull remote container
 docker pull ghcr.io/erickubenka/conviva:main
-docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot ghcr.io/erickubenka/conviva:main
+docker run -d -it -v /root/.conviva/userdata:/root/.conviva/userdata -v /root/.conviva/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot ghcr.io/erickubenka/conviva:main
 ````
 
 ### With locally built image
+
 ````bash
-docker run -d -it -v /absolute/path/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot
+docker run -d -it -v /root/.conviva/userdata:/root/.conviva/userdata -v /root/.conviva/conviva.properties:/app/conviva.properties -v /etc/localtime:/etc/localtime:ro -v /etc/timezone:/etc/timezone:ro --name conviva-bot conviva-bot
 ````
 
-Currently, the bot somehow tries to allocate a lot of memory during its execution. To avoid a stuck bot, you can go for the restart and memory limit options.  
+Currently, the bot somehow tries to allocate a lot of memory during its execution. To avoid a stuck bot, you can go for
+the restart and memory limit options.  
 This will restart the bot if more than 3GB of memory is used by the container.
 
 ```

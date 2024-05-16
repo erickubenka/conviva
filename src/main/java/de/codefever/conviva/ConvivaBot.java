@@ -15,7 +15,6 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
 
     public static void main(String[] args) {
 
-        JVMMonitor.start();
         PROPERTY_MANAGER.loadProperties("conviva.properties");
 
         WEB_DRIVER_MANAGER.setUserAgentConfig(Browsers.chromeHeadless, new ChromeConfig() {
@@ -44,12 +43,12 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
 //        devTools.createSession();
 //        devTools.send(Emulation.setTimezoneOverride("Europe/Berlin"));
 
+        JVMMonitor.stop();
         final WhatsAppUiBot whatsAppUiBot = new WhatsAppUiBot();
         whatsAppUiBot.run();
 
         // final exit
         WEB_DRIVER_MANAGER.requestShutdownAllSessions();
-        JVMMonitor.stop();
         System.exit(0);
     }
 }
