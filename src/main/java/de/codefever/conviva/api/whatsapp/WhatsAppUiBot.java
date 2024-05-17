@@ -18,7 +18,6 @@ import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.common.Testerra;
 import eu.tsystems.mms.tic.testframework.internal.Timings;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
-import eu.tsystems.mms.tic.testframework.monitor.JVMMonitor;
 import eu.tsystems.mms.tic.testframework.report.model.context.ExecutionContext;
 import eu.tsystems.mms.tic.testframework.report.model.context.LogMessage;
 import eu.tsystems.mms.tic.testframework.report.utils.IExecutionContextController;
@@ -82,6 +81,12 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     private String webDriverUUID = null;
 
     /**
+     * ExecutionContext of this bot instance.
+     */
+    private final ExecutionContext executionContext;
+    private final Field methodContextLessLogs;
+
+    /**
      * Start time of the bot.
      */
     private final LocalDateTime startTime = LocalDateTime.now();
@@ -129,6 +134,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         this.registerCommand(new BugCommand());
         this.registerCommand(new TopPostCommand());
         this.registerCommand(new HelpCommand(this.commands));
+
+        try {
+            this.executionContext = Testerra.getInjector().getInstance(IExecutionContextController.class).getExecutionContext();
+            this.methodContextLessLogs = executionContext.getClass().getDeclaredField("methodContextLessLogs");
+            this.methodContextLessLogs.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -360,11 +373,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
     private void cleanUpLogs() {
         try {
-            final ExecutionContext executionContext = Testerra.getInjector().getInstance(IExecutionContextController.class).getExecutionContext();
-            synchronized (executionContext) {
-                final Field methodContextLessLogs = executionContext.getClass().getDeclaredField("methodContextLessLogs");
-                methodContextLessLogs.setAccessible(true);
-                ((ConcurrentLinkedQueue<LogMessage>) methodContextLessLogs.get(executionContext)).clear();
+            synchronized (this.executionContext) {
+                ((ConcurrentLinkedQueue<LogMessage>) this.methodContextLessLogs.get(this.executionContext)).clear();
             }
         } catch (Exception e) {
             log().error("Error while cleaning up logs: {}", e.getMessage());
