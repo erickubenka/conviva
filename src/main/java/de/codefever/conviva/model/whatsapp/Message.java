@@ -13,6 +13,9 @@ import java.util.Objects;
  */
 public class Message implements PropertyManagerProvider {
 
+    private static final ZoneId MESSAGE_TIME_ZONE_ID = ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages"));
+    private static final ZoneId TARGET_TIME_ZONE_ID = ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"));
+
     /**
      * The metadata of the message.
      */
@@ -77,8 +80,8 @@ public class Message implements PropertyManagerProvider {
         }
 
         // transform if necessary, take the dateTime and suggest it is in UTC timezione, then transform it to the Europe/Berlin timezone
-        if (!PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages").equals(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"))) {
-            this.dateTime = this.dateTime.atZone(ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages"))).withZoneSameInstant(ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"))).toLocalDateTime();
+        if (!MESSAGE_TIME_ZONE_ID.equals(TARGET_TIME_ZONE_ID)) {
+            this.dateTime = this.dateTime.atZone(MESSAGE_TIME_ZONE_ID).withZoneSameInstant(TARGET_TIME_ZONE_ID).toLocalDateTime();
         }
 
         this.author = author;
