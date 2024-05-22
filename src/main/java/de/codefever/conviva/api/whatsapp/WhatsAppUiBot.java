@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
  */
 public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, WebDriverManagerProvider, PropertyManagerProvider {
 
+    private static final Object LOCK = new Object();
+
     /**
      * Debug mode for the bot. If true, the bot will not send any messages and only log them.
      */
@@ -359,7 +361,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             }
         });
 
-        synchronized (this.messages) {
+        synchronized (LOCK) {
             return this.messages.stream().filter(message -> {
                 for (final String part : messagePartsToIgnore) {
                     if (message.getMessage().contains(part)) {
@@ -373,7 +375,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
     private void cleanUpLogs() {
         try {
-            synchronized (this.executionContext) {
+            synchronized (LOCK) {
                 ((ConcurrentLinkedQueue<LogMessage>) this.methodContextLessLogs.get(this.executionContext)).clear();
             }
         } catch (Exception e) {
