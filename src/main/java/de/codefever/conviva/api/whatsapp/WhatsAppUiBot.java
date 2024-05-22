@@ -382,11 +382,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             log().error("Error while cleaning up logs: {}", e.getMessage());
         }
 
-        synchronized (Timings.TIMING_GUIELEMENT_FIND_WITH_PARENT) {
+        synchronized (LOCK) {
             Timings.TIMING_GUIELEMENT_FIND_WITH_PARENT.clear();
-        }
-
-        synchronized (Timings.TIMING_GUIELEMENT_FIND) {
             Timings.TIMING_GUIELEMENT_FIND.clear();
         }
     }
