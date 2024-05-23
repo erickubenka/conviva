@@ -25,7 +25,7 @@ targetCompatibility = JavaVersion.VERSION_11
 
 dependencies {
     // ui stuff from Testerra
-    implementation "io.testerra:driver-ui-desktop:${testerraVersion}"
+    implementation "io.testerra:driver-ui:${testerraVersion}"
     implementation "io.testerra:report-ng:${testerraVersion}"
 
     implementation 'org.json:json:20240303'
@@ -62,12 +62,11 @@ jar {
         attributes 'Multi-Release': 'true'
     }
 
-
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "guice-4.2.2-no_aop.jar")
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "guice-4.2.2-no_aop.jar", "byte-buddy-1.14.12.jar", "net/bytebuddy/**")
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
