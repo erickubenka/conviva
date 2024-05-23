@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -41,17 +42,32 @@ public class CompletionsApiClient implements Loggable, PropertyManagerProvider {
      * @return String
      */
     public String postCompletion(Prompt prompt) {
+
         final JSONObject jsonBody = new JSONObject();
         jsonBody.put("model", OPENAI_MODEL);
 
-        final JSONObject openAiInitMessage = new JSONObject();
-        openAiInitMessage.put("role", "system");
-        openAiInitMessage.put("content", prompt.systemPrompt());
+        final JSONObject systemPromptMessageObject = new JSONObject();
+        final JSONArray systemPromptContentArray = new JSONArray();
+        final JSONObject systemPromptContentObject = new JSONObject();
+        systemPromptMessageObject.put("role", "system");
+        systemPromptContentObject.put("type", "text");
+        systemPromptContentObject.put("text", prompt.systemPrompt());
+        systemPromptContentArray.put(systemPromptContentObject);
+        systemPromptMessageObject.put("content", systemPromptContentArray);
 
-        final JSONObject openAiPromptMessage = new JSONObject();
-        openAiPromptMessage.put("role", "user");
-        openAiPromptMessage.put("content", prompt.userPrompt());
-        jsonBody.put("messages", new JSONObject[]{openAiInitMessage, openAiPromptMessage});
+        final JSONObject userPromptMessageObject = new JSONObject();
+        final JSONArray userPromptContentArray = new JSONArray();
+        final JSONObject userPromptContentObject = new JSONObject();
+        userPromptContentObject.put("type", "text");
+        userPromptContentObject.put("text", prompt.userPrompt());
+        userPromptContentArray.put(userPromptContentObject);
+        userPromptMessageObject.put("role", "user");
+        userPromptMessageObject.put("content", userPromptContentArray);
+
+        final JSONArray messagesArray = new JSONArray();
+        messagesArray.put(systemPromptMessageObject);
+        messagesArray.put(userPromptMessageObject);
+        jsonBody.put("messages", messagesArray);
 
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpPost httpPost = new HttpPost(API_URL);
