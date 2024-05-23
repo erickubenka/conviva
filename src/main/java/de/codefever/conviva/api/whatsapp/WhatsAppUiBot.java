@@ -1,15 +1,6 @@
 package de.codefever.conviva.api.whatsapp;
 
-import de.codefever.conviva.api.whatsapp.command.BotCommand;
-import de.codefever.conviva.api.whatsapp.command.BugCommand;
-import de.codefever.conviva.api.whatsapp.command.HelpCommand;
-import de.codefever.conviva.api.whatsapp.command.RestartCommand;
-import de.codefever.conviva.api.whatsapp.command.StatusCommand;
-import de.codefever.conviva.api.whatsapp.command.StopCommand;
-import de.codefever.conviva.api.whatsapp.command.SummaryCommand;
-import de.codefever.conviva.api.whatsapp.command.SupCommand;
-import de.codefever.conviva.api.whatsapp.command.TldrCommand;
-import de.codefever.conviva.api.whatsapp.command.TopPostCommand;
+import de.codefever.conviva.api.whatsapp.command.*;
 import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
 import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
@@ -24,6 +15,7 @@ import eu.tsystems.mms.tic.testframework.report.utils.IExecutionContextControlle
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -229,18 +221,23 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             log().info("Running Thread: {}", Thread.currentThread().getName());
 
                                             // anything to say before run a potential heavy-load command?
-                                            if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
+                                            if (!StringUtils.isBlank(command.beforeMessage())) {
                                                 sendMessage(command.beforeMessage());
                                             }
 
                                             // run command
-                                            final String commandOutput = command.run(this.filterMessages());
-                                            if (commandOutput != null && !commandOutput.isEmpty()) {
+                                            // for normal commands, we pass a filtered message list and every keyword is removed
+                                            // for commands that have a quoted message, we pass only the related message
+                                            final String commandOutput = newMessage.hasQuotedMessage() ?
+                                                    command.run(new ArrayList<>(List.of(newMessage))) :
+                                                    command.run(this.filterMessages());
+
+                                            if (!StringUtils.isBlank(commandOutput)) {
                                                 sendMessage(command.outputIdentifier() + "\n" + commandOutput);
                                             }
 
                                             // anything to say after this command?
-                                            if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
+                                            if (!StringUtils.isBlank(command.afterMessage())) {
                                                 sendMessage(command.afterMessage());
                                             }
                                         });
@@ -263,7 +260,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                         }
 
                                         // anything to say before run a potential heavy-load command?
-                                        if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
+                                        if (StringUtils.isBlank(command.beforeMessage())) {
                                             sendMessage(command.beforeMessage());
                                         }
 
@@ -275,12 +272,12 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             commandOutput = "";
                                         }
 
-                                        if (commandOutput != null && !commandOutput.isEmpty()) {
+                                        if (!StringUtils.isBlank(commandOutput)) {
                                             sendMessage(command.outputIdentifier() + "\n" + commandOutput);
                                         }
 
                                         // anything to say after this command?
-                                        if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
+                                        if (!StringUtils.isBlank(command.afterMessage())) {
                                             sendMessage(command.afterMessage());
                                         }
                                     }
@@ -345,19 +342,19 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         final List<String> messagePartsToIgnore = new ArrayList<>();
         commands.forEach(command -> {
 
-            if (command.outputIdentifier() != null && !command.outputIdentifier().isEmpty()) {
+            if (!StringUtils.isBlank(command.outputIdentifier())) {
                 messagePartsToIgnore.add(command.outputIdentifier());
             }
 
-            if (command.command() != null && !command.command().isEmpty()) {
+            if (!StringUtils.isBlank(command.command())) {
                 messagePartsToIgnore.add(command.command());
             }
 
-            if (command.beforeMessage() != null && !command.beforeMessage().isEmpty()) {
+            if (!StringUtils.isBlank(command.beforeMessage())) {
                 messagePartsToIgnore.add(command.beforeMessage());
             }
 
-            if (command.afterMessage() != null && !command.afterMessage().isEmpty()) {
+            if (!StringUtils.isBlank(command.afterMessage())) {
                 messagePartsToIgnore.add(command.afterMessage());
             }
         });

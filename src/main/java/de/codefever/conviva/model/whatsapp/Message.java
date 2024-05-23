@@ -70,11 +70,15 @@ public class Message implements PropertyManagerProvider {
     }
 
     public String getQuotedMessage() {
-        return quotedMessage;
+        return this.quotedMessage;
     }
 
     public void setQuotedMessage(final String quotedMessage) {
         this.quotedMessage = quotedMessage;
+    }
+
+    public boolean hasQuotedMessage() {
+        return this.quotedMessage != null;
     }
 
     /**

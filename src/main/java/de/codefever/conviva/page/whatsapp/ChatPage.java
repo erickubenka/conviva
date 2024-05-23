@@ -6,9 +6,9 @@ import eu.tsystems.mms.tic.testframework.pageobjects.Check;
 import eu.tsystems.mms.tic.testframework.pageobjects.UiElement;
 import eu.tsystems.mms.tic.testframework.pageobjects.UiElementList;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 
@@ -219,7 +219,7 @@ public class ChatPage extends HomePage {
                 // get text from message - this will exclude quoted messages
                 final String textOfMessage = spanTextBuilder.toString();
                 // found a message, go deeper...
-                if (dateAndAuthor != null && !textOfMessage.isEmpty() && !dateAndAuthor.isEmpty()) {
+                if (StringUtils.isNotBlank(dateAndAuthor) && StringUtils.isNotBlank(textOfMessage)) {
                     try {
                         final Message message = new Message(dateAndAuthor, textOfMessage);
 
