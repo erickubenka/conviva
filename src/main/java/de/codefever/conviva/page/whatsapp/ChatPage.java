@@ -185,7 +185,12 @@ public class ChatPage extends HomePage {
      * @return {@link Message}
      */
     public Message lastMessageOfList(final boolean includeOwnMessages) {
-        return this.visibleMessages(1, false).get(0);
+        final List<Message> foundMessages = this.visibleMessages(1, includeOwnMessages);
+        if (!foundMessages.isEmpty()) {
+            return foundMessages.get(0);
+        }
+
+        return null;
     }
 
     /**
@@ -198,39 +203,44 @@ public class ChatPage extends HomePage {
         final UiElement copyableSpanElement = messageElement.find(By.cssSelector("span.copyable-text"));
 
         try {
-            // does message have text?
+            // does message have text? (For example single emoji messages does not have text)
             if (copyableSpanElement.expect().displayed().getActual()) {
 
-                // get text from message - this will exclude quoted messages
-                final String date = messageElement.expect().attribute("data-pre-plain-text").getActual();
+                // div.message-in > div.copyable-text - Attribute data-pre-plain-text
+                final String dateAndAuthor = messageElement.expect().attribute("data-pre-plain-text").getActual();
 
                 // get span elements of message, if greater than one we have to combine them
                 final UiElementList<UiElement> spanElementList = copyableSpanElement.list();
                 final StringBuilder spanTextBuilder = new StringBuilder();
-                spanElementList.stream().parallel().forEach(spanElement -> spanTextBuilder.append(spanElement.expect().text().getActual()));
+                for (final UiElement spanElement : spanElementList) {
+                    spanTextBuilder.append(spanElement.expect().text().getActual());
+                }
 
-                // quoted message - todo - for !ggl or !tldr of a specific post. Not yet implemented
-//                    if (messageElement.find(By.cssSelector("span.quoted-mention")).expect().displayed().getActual()) {
-//                        final String quotedMessageText = messageElement.find(By.cssSelector("span.quoted-mention")).expect().text().getActual();
-//                        log().info(String.format("Quoted message found, message: %s, quoted message: %s", text, quotedMessageText));
-//                    }
-
+                // get text from message - this will exclude quoted messages
                 final String textOfMessage = spanTextBuilder.toString();
-                if (date != null && !textOfMessage.isEmpty() && !date.isEmpty()) {
+                // found a message, go deeper...
+                if (dateAndAuthor != null && !textOfMessage.isEmpty() && !dateAndAuthor.isEmpty()) {
                     try {
-                        final Message message = new Message(date, spanTextBuilder.toString());
+                        final Message message = new Message(dateAndAuthor, textOfMessage);
+
+                        // quoted message detection - for !ggl or !tldr of a specific post. GitHub Issue #14
+                        if (messageElement.find(By.cssSelector("span.quoted-mention")).expect().displayed().getActual()) {
+                            final String quotedMessageText = messageElement.find(By.cssSelector("span.quoted-mention")).expect().text().getActual();
+                            log().info(String.format("Quoted message found, message: %s, quoted message: %s", textOfMessage, quotedMessageText));
+                            message.setQuotedMessage(quotedMessageText);
+                        }
+
                         log().info("Message parsed successfully: {}", message);
                         return message;
                     } catch (Exception e) {
-                        log().warn("Could not parse message: {} with date: {}", spanTextBuilder, date);
+                        log().warn("Could not parse message: {} with date: {}", textOfMessage, dateAndAuthor);
                     }
                 }
             }
         } catch (UiElementAssertionError e) {
             log().error("UiElementAssertionError: {}", messageElement);
-        }
-        catch (IndexOutOfBoundsException e){
-            log().error("IndexOutOfBoundsException: {}", messageElement);
+        } catch (IndexOutOfBoundsException e) {
+            log().error("IndexOutOfBoundsException: {}, {}", messageElement, e.getStackTrace());
         }
 
         return null;

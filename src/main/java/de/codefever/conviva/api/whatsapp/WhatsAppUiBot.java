@@ -190,7 +190,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         while (!stop) {
             // sort
             this.messages.sort(Comparator.comparing(Message::getDateTime));
-            List<Message> potentiallyNewMessages = null;
+            final List<Message> potentiallyNewMessages = new ArrayList<>();
 
             try {
                 // break loop detection, so we have to go for a double class init to break buffer
@@ -202,16 +202,17 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 // if not, get last 5 messages to ensure we got everything that is possibly new.
                 final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
                 if (message != null && !this.messages.contains(message)) {
-                    potentiallyNewMessages = chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES);
+                    potentiallyNewMessages.addAll(chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES));
                 } else {
                     log().debug("No new messages found.");
                 }
             } catch (Exception e) {
-                log().error("Error while getting messages: {}", e.getMessage());
+                log().error("Error while getting messages: {}, {}", e.getMessage(), e.getStackTrace());
             }
 
             // if we have potentially new messages, check them
-            if (potentiallyNewMessages != null) {
+            this.messages.sort(Comparator.comparing(Message::getDateTime));
+            if (!potentiallyNewMessages.isEmpty()) {
                 for (final Message newMessage : potentiallyNewMessages) {
                     if (!messages.contains(newMessage)) {
                         messages.add(newMessage);

@@ -27,6 +27,11 @@ public class Message implements PropertyManagerProvider {
     private final String message;
 
     /**
+     * Content of quoted message
+     */
+    private String quotedMessage;
+
+    /**
      * The date and time of the message.
      */
     private LocalDateTime dateTime;
@@ -64,6 +69,14 @@ public class Message implements PropertyManagerProvider {
         return author;
     }
 
+    public String getQuotedMessage() {
+        return quotedMessage;
+    }
+
+    public void setQuotedMessage(final String quotedMessage) {
+        this.quotedMessage = quotedMessage;
+    }
+
     /**
      * Converts "[07:49, 4/19/2024] Author Name:" to date and author
      */
@@ -75,11 +88,11 @@ public class Message implements PropertyManagerProvider {
 
         try {
             this.dateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("HH:mm, M/d/yyyy"));
-        } catch (DateTimeParseException e) {
+        } catch (final DateTimeParseException e) {
             this.dateTime = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("HH:mm, d.M.yyyy"));
         }
 
-        // transform if necessary, take the dateTime and suggest it is in UTC timezione, then transform it to the Europe/Berlin timezone
+        // transform if necessary, take the dateTime and suggest it is in UTC timezone, then transform it to the Europe/Berlin timezone
         if (!MESSAGE_TIME_ZONE_ID.equals(TARGET_TIME_ZONE_ID)) {
             this.dateTime = this.dateTime.atZone(MESSAGE_TIME_ZONE_ID).withZoneSameInstant(TARGET_TIME_ZONE_ID).toLocalDateTime();
         }
@@ -97,7 +110,8 @@ public class Message implements PropertyManagerProvider {
         return "Message{" +
                 "metaData='" + metaData + '\'' +
                 ", message='" + message + '\'' +
-                ", dateTime=" + dateTime +
+                ", dateTime=" + dateTime + '\'' +
+                ", quotedMessage=" + quotedMessage + '\'' +
                 '}';
     }
 
