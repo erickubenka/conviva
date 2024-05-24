@@ -207,6 +207,14 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 }
             } catch (Exception e) {
                 log().error("Error while getting messages: {}, {}", e.getMessage(), e.getStackTrace());
+
+                // Restart detection for Chrome when it comes unavailable - See GitHub Issue #15
+                if (e.getMessage().contains("Could not create instance of HomePage on \"(na)\" ((na))")) {
+                    log().error("WebDriver seems to be closed. Restarting WebDriver.");
+                    WEB_DRIVER_MANAGER.shutdownAllSessions();
+                    this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
+                    new LoginWorkFlow(chatName, webDriverUUID).run();
+                }
             }
 
             // if we have potentially new messages, check them
@@ -216,7 +224,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                     if (!messages.contains(newMessage)) {
                         messages.add(newMessage);
                         log().info("Added message to list: {}", newMessage.getMessage());
-
                         if (newMessage.getDateTime().isAfter(startTime)) {
                             for (final BotCommand command : this.commands) {
                                 // check for registered commands and run.
@@ -235,6 +242,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             // run command
                                             // for normal commands, we pass a filtered message list and every keyword is removed
                                             // for commands that have a quoted message, we pass only the related message
+                                            // todo - may we can hook in here to check for the new message if they have a quoted message associated and then search for the quoted message in our list and associate them, because long quoted messages will be cut off
                                             final String commandOutput = newMessage.hasQuotedMessage() ?
                                                     command.run(new ArrayList<>(List.of(newMessage))) :
                                                     command.run(this.filterMessages());

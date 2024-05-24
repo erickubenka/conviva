@@ -207,7 +207,7 @@ public class ChatPage extends HomePage {
             if (copyableSpanElement.expect().displayed().getActual()) {
 
                 // read more detection - sub element div.read-more-button exists
-                if(messageElement.find(By.cssSelector("div.read-more-button")).expect().displayed().getActual()) {
+                if (messageElement.find(By.cssSelector("div.read-more-button")).expect().displayed().getActual()) {
                     log().debug("Found long message, clicking read more button.");
                     messageElement.find(By.cssSelector("div.read-more-button")).click();
                 }
@@ -231,6 +231,9 @@ public class ChatPage extends HomePage {
 
                         // quoted message detection - for !ggl or !tldr of a specific post. GitHub Issue #14
                         if (messageElement.find(By.cssSelector("span.quoted-mention")).expect().displayed().getActual()) {
+
+                            // be aware, that long quoted messages will be cut off, and only the first part will be displayed and associated with the message at this time
+                            // To get the full message text of the quoted message, they will be handled afterward in the new message detection or even only when required for a specific BotCommand implementation
                             final String quotedMessageText = messageElement.find(By.cssSelector("span.quoted-mention")).expect().text().getActual();
                             log().info(String.format("Quoted message found, message: %s, quoted message: %s", textOfMessage, quotedMessageText));
                             message.setQuotedMessage(quotedMessageText);
