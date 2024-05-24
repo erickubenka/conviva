@@ -33,6 +33,10 @@ public class HelpCommand implements BotCommand {
     @Override
     public String run(final List<Message> messages) {
 
+        if (this.isIntendedForQuotedMessage(messages)) {
+            return "";
+        }
+
         final StringBuilder output = new StringBuilder("Folgende Befehle sind verfügbar:");
         for (final BotCommand command : availableCommands) {
             if (command.isPublic()) {

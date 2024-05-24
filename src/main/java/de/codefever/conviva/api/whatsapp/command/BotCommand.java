@@ -67,4 +67,18 @@ public interface BotCommand extends Loggable {
      */
     boolean isRunInThread();
 
+    /**
+     * Determines if the list of {@link Message} is intended for a quoted message command,
+     * meaning that only 1 message is in this list and the command was called as a reply to a message which means
+     * that the message itself will equal the command, but the quoted message will be present and should be sued for the command itself
+     * <p>
+     * Returns true when list size is 1 and the message has a quoted message
+     * Returns false when more than one message is in the list
+     *
+     * @param messages {@link List} of {@link Message}
+     * @return {@link boolean}
+     */
+    default boolean isIntendedForQuotedMessage(final List<Message> messages) {
+        return messages.size() == 1 && messages.get(0).hasQuotedMessage();
+    }
 }

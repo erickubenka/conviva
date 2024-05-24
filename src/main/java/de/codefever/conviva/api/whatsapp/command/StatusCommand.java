@@ -34,8 +34,14 @@ public class StatusCommand implements BotCommand {
 
     @Override
     public String run(final List<Message> messages) {
+
+        if (this.isIntendedForQuotedMessage(messages)) {
+            return "";
+        }
+
         return "Online seit " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + ". " +
-                "\nIch kann dir " + messages.size() + " Nachrichten seit " + messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. ";
+                "\nVerfügbare Nachrichten: " + messages.size() +
+                "\nErste Nachricht von:" + messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
     }
 
     @Override

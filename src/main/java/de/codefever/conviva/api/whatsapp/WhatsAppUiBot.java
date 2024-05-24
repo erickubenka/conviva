@@ -1,6 +1,14 @@
 package de.codefever.conviva.api.whatsapp;
 
-import de.codefever.conviva.api.whatsapp.command.*;
+import de.codefever.conviva.api.whatsapp.command.BotCommand;
+import de.codefever.conviva.api.whatsapp.command.BugCommand;
+import de.codefever.conviva.api.whatsapp.command.HelpCommand;
+import de.codefever.conviva.api.whatsapp.command.RestartCommand;
+import de.codefever.conviva.api.whatsapp.command.StatusCommand;
+import de.codefever.conviva.api.whatsapp.command.StopCommand;
+import de.codefever.conviva.api.whatsapp.command.SupCommand;
+import de.codefever.conviva.api.whatsapp.command.TldrCommand;
+import de.codefever.conviva.api.whatsapp.command.TopPostCommand;
 import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
 import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
@@ -122,7 +130,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         this.registerCommand(new StatusCommand(startTime));
 //        this.registerCommand(new StopCommand(BOT_NAME));
         this.registerCommand(new RestartCommand(this.chatName));
-        this.registerCommand(new SummaryCommand());
         this.registerCommand(new TldrCommand());
         this.registerCommand(new SupCommand());
         this.registerCommand(new BugCommand());

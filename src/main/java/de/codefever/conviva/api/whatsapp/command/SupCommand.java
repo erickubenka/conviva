@@ -29,6 +29,10 @@ public class SupCommand implements BotCommand {
     @Override
     public String run(final List<Message> messages) {
 
+        if (this.isIntendedForQuotedMessage(messages)) {
+            return "";
+        }
+
         final SupPrompt prompt = new SupPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new CompletionsApiClient().postCompletion(prompt);

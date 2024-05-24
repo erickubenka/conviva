@@ -1,9 +1,61 @@
 package de.codefever.conviva.api.whatsapp.command;
 
 
-public class TldrCommand extends SummaryCommand {
+import de.codefever.conviva.api.openai.CompletionsApiClient;
+import de.codefever.conviva.api.whatsapp.prompt.SingleMessageSummaryPrompt;
+import de.codefever.conviva.api.whatsapp.prompt.SummaryPrompt;
+import de.codefever.conviva.model.openai.Prompt;
+import de.codefever.conviva.model.whatsapp.Message;
+
+import java.util.List;
+
+/**
+ * Command to summarize the chat history.
+ */
+public class TldrCommand implements BotCommand {
+
     @Override
     public String command() {
         return "!tldr";
+    }
+
+    @Override
+    public String description() {
+        return "Fasst den Chatverlauf oder die zitierte Nachricht zusammen.";
+    }
+
+    @Override
+    public String outputIdentifier() {
+        return "###SUMMARY###";
+    }
+
+    @Override
+    public String run(final List<Message> messages) {
+
+        final Prompt prompt = this.isIntendedForQuotedMessage(messages) ? new SingleMessageSummaryPrompt(messages.get(0).getQuotedMessage()) : new SummaryPrompt(messages);
+        log().info("Prompt: {}", prompt.userPrompt());
+        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        log().info("Summary: {}", summary);
+        return summary;
+    }
+
+    @Override
+    public String beforeMessage() {
+        return "###SUMMARY IN PROCESS###";
+    }
+
+    @Override
+    public String afterMessage() {
+        return "";
+    }
+
+    @Override
+    public boolean isPublic() {
+        return true;
+    }
+
+    @Override
+    public boolean isRunInThread() {
+        return true;
     }
 }
