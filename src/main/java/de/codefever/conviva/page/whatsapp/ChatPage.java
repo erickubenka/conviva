@@ -206,6 +206,12 @@ public class ChatPage extends HomePage {
             // does message have text? (For example single emoji messages does not have text)
             if (copyableSpanElement.expect().displayed().getActual()) {
 
+                // read more detection - sub element div.read-more-button exists
+                if(messageElement.find(By.cssSelector("div.read-more-button")).expect().displayed().getActual()) {
+                    log().debug("Found long message, clicking read more button.");
+                    messageElement.find(By.cssSelector("div.read-more-button")).click();
+                }
+
                 // div.message-in > div.copyable-text - Attribute data-pre-plain-text
                 final String dateAndAuthor = messageElement.expect().attribute("data-pre-plain-text").getActual();
 
