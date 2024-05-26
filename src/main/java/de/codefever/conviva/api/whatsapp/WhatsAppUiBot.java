@@ -197,7 +197,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             } catch (Exception e) {
                 log().error("Error while getting messages: {}, {}", e.getMessage(), e.getStackTrace());
                 // Restart detection for Chrome when it comes unavailable - See GitHub Issue #15
-                if (e.getMessage().contains("Could not create instance of HomePage on \"(na)\" ((na))")) {
+                if (e.getMessage().contains("Could not create instance of HomePage on \"(na)\" ((na))") || e.getMessage().contains("Could not create instance of ChatPage on \"(na)\" ((na))")) {
                     log().error("WebDriver seems to be closed. Restarting WebDriver.");
                     WEB_DRIVER_MANAGER.shutdownAllSessions();
                     this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
