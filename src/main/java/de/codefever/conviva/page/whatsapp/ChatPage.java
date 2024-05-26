@@ -125,7 +125,6 @@ public class ChatPage extends HomePage {
      */
     public ChatPage scrollToBottom() {
         this.inputChat.sendKeys(Keys.PAGE_DOWN);
-        TimerUtils.sleep(100);
         return createPage(ChatPage.class);
     }
 
