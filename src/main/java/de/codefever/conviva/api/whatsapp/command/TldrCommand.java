@@ -30,9 +30,9 @@ public class TldrCommand implements BotCommand {
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
 
-        final Prompt prompt = this.isIntendedForQuotedMessage(messages) ? new SingleMessageSummaryPrompt(messages.get(0).getQuotedMessage()) : new SummaryPrompt(messages);
+        final Prompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new SingleMessageSummaryPrompt(messages.get(0).getQuotedMessage()) : new SummaryPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new CompletionsApiClient().postCompletion(prompt);
         log().info("Summary: {}", summary);

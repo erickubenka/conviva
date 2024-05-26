@@ -37,7 +37,7 @@ public interface BotCommand extends Loggable {
      * @param messages {@link List} of {@link Message}
      * @return {@link String}
      */
-    String run(final List<Message> messages);
+    String run(final Message callToCommand, final List<Message> messages);
 
     /**
      * Message that should be sent to the chat before executing the command
@@ -75,10 +75,10 @@ public interface BotCommand extends Loggable {
      * Returns true when list size is 1 and the message has a quoted message
      * Returns false when more than one message is in the list
      *
-     * @param messages {@link List} of {@link Message}
+     * @param callToCommand {@link List} of {@link Message}
      * @return {@link boolean}
      */
-    default boolean isIntendedForQuotedMessage(final List<Message> messages) {
-        return messages.size() == 1 && messages.get(0).hasQuotedMessage();
+    default boolean isIntendedForQuotedMessage(final Message callToCommand) {
+        return callToCommand.hasQuotedMessage();
     }
 }

@@ -25,7 +25,7 @@ public class BugCommand implements BotCommand {
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
         return "Meldung erfolgreich. Für schnelle Bearbeitung hilft eine Spende an paypal.me/erickubenka";
     }
 

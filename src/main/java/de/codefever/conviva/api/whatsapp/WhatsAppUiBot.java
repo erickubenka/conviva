@@ -2,6 +2,7 @@ package de.codefever.conviva.api.whatsapp;
 
 import de.codefever.conviva.api.whatsapp.command.BotCommand;
 import de.codefever.conviva.api.whatsapp.command.BugCommand;
+import de.codefever.conviva.api.whatsapp.command.GenericOpenAiAssistantCommand;
 import de.codefever.conviva.api.whatsapp.command.HelpCommand;
 import de.codefever.conviva.api.whatsapp.command.RestartCommand;
 import de.codefever.conviva.api.whatsapp.command.StatusCommand;
@@ -27,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -53,11 +53,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     private static final boolean DEBUG_READ_OWN_MESSAGES = PROPERTY_MANAGER.getBooleanProperty("conviva.bot.read.own.messages");
 
     /**
-     * If true, the bot will start silently without any message.
-     */
-    private static final boolean START_SILENT = PROPERTY_MANAGER.getBooleanProperty("conviva.bot.start.silent");
-
-    /**
      * Timeout in minutes for the bot to start.
      */
     private static final int START_TIMEOUT = Integer.parseInt(PROPERTY_MANAGER.getProperty("conviva.bot.start.timeout"));
@@ -66,6 +61,11 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      * Name of the bot.
      */
     private static final String BOT_NAME = PROPERTY_MANAGER.getProperty("conviva.bot.name");
+
+    /**
+     * This shorthand will be used as command identifier to call the bot directly if you want to.
+     */
+    private static final String BOT_NAME_SHORTHAND = PROPERTY_MANAGER.getProperty("conviva.bot.name.shorthand");
 
     /**
      * Maximum cache time in hours for messages.
@@ -134,6 +134,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         this.registerCommand(new SupCommand());
         this.registerCommand(new BugCommand());
         this.registerCommand(new TopPostCommand());
+        this.registerCommand(new GenericOpenAiAssistantCommand(BOT_NAME_SHORTHAND));
         this.registerCommand(new HelpCommand(this.commands));
 
         try {
@@ -162,7 +163,6 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
         log().info("Starting Bot {} in chat {} at {}.", BOT_NAME, chatName, startTime);
         this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
-
         ChatPage chatPage = new LoginWorkFlow(chatName, webDriverUUID).run();
 
         // init messages and get rid of old stuff.
@@ -173,41 +173,29 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
         chatPage = chatPage.createPage(HomePage.class).openChat(chatName);
-        chatPage.scrollToBottom();
 
         // init done
         log().info("Initialized. Current messages for today: {}", messages.size());
-
-        if (!START_SILENT) {
-            this.sendMessage(outputStart +
-                    "\nHi, ich bin " + BOT_NAME + " und jetzt verfügbar." +
-                    "\nIch kann dir " + filterMessages().size() + " Nachrichten seit " + filterMessages().get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) + " zusammenfassen. " +
-                    "\nSchreibe !help für Hilfe.");
-        }
-
         boolean stop = false;
         while (!stop) {
-            // sort
             this.messages.sort(Comparator.comparing(Message::getDateTime));
             final List<Message> potentiallyNewMessages = new ArrayList<>();
 
             try {
+                chatPage.scrollToBottom();
                 // break loop detection, so we have to go for a double class init to break buffer
                 PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 chatPage = PAGE_FACTORY.createPage(ChatPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
 
                 // find last message and check if already in message list
-                // if we already know this message,s just continue
+                // if we already know this message, just continue
                 // if not, get last 5 messages to ensure we got everything that is possibly new.
                 final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
                 if (message != null && !this.messages.contains(message)) {
                     potentiallyNewMessages.addAll(chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES));
-                } else {
-                    log().debug("No new messages found.");
                 }
             } catch (Exception e) {
                 log().error("Error while getting messages: {}, {}", e.getMessage(), e.getStackTrace());
-
                 // Restart detection for Chrome when it comes unavailable - See GitHub Issue #15
                 if (e.getMessage().contains("Could not create instance of HomePage on \"(na)\" ((na))")) {
                     log().error("WebDriver seems to be closed. Restarting WebDriver.");
@@ -227,7 +215,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                         if (newMessage.getDateTime().isAfter(startTime)) {
                             for (final BotCommand command : this.commands) {
                                 // check for registered commands and run.
-                                if (newMessage.getMessage().trim().toLowerCase().equals(command.command())) {
+                                if (newMessage.getMessage().trim().toLowerCase().startsWith(command.command())) {
 
                                     // threaded commands ...
                                     if (command.isRunInThread()) {
@@ -249,12 +237,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             }
 
                                             // run command
-                                            // for normal commands, we pass a filtered message list and every keyword is removed
-                                            // for commands that have a quoted message, we pass only the related message
-                                            final String commandOutput = newMessage.hasQuotedMessage() ?
-                                                    command.run(new ArrayList<>(List.of(newMessage))) :
-                                                    command.run(this.filterMessages());
-
+                                            final String commandOutput = command.run(newMessage, this.filterMessages());
                                             if (!StringUtils.isBlank(commandOutput)) {
                                                 sendMessage(command.outputIdentifier() + "\n" + commandOutput);
                                             }
@@ -288,7 +271,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                         }
 
                                         // run command
-                                        String commandOutput = command.run(this.filterMessages());
+                                        String commandOutput = command.run(newMessage, this.filterMessages());
                                         // RestartCommand extra definition
                                         if (command instanceof RestartCommand) {
                                             this.webDriverUUID = commandOutput;

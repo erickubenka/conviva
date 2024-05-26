@@ -11,7 +11,7 @@ public class HelpCommand implements BotCommand {
 
     private final List<BotCommand> availableCommands;
 
-    public HelpCommand(List<BotCommand> availableCommands) {
+    public HelpCommand(final List<BotCommand> availableCommands) {
         this.availableCommands = availableCommands;
     }
 
@@ -31,9 +31,9 @@ public class HelpCommand implements BotCommand {
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
 
-        if (this.isIntendedForQuotedMessage(messages)) {
+        if (this.isIntendedForQuotedMessage(callToCommand)) {
             return "";
         }
 

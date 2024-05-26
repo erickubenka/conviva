@@ -27,9 +27,9 @@ public class SupCommand implements BotCommand {
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
 
-        if (this.isIntendedForQuotedMessage(messages)) {
+        if (this.isIntendedForQuotedMessage(callToCommand)) {
             return "";
         }
 

@@ -33,7 +33,12 @@ public class StopCommand implements BotCommand, WebDriverManagerProvider {
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
+
+        if (this.isIntendedForQuotedMessage(callToCommand)) {
+            return "";
+        }
+
         TimerUtils.sleep(3000);
         WEB_DRIVER_MANAGER.shutdownAllSessions();
         System.exit(0);

@@ -32,7 +32,7 @@ public class RestartCommand implements BotCommand, WebDriverManagerProvider, Pag
     }
 
     @Override
-    public String run(final List<Message> messages) {
+    public String run(final Message callToCommand, final List<Message> messages) {
 
         TimerUtils.sleep(5000, "Wait for Restart!");
         WEB_DRIVER_MANAGER.shutdownAllSessions();
