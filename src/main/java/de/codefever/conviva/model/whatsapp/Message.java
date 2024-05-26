@@ -114,8 +114,8 @@ public class Message implements PropertyManagerProvider {
         return "Message{" +
                 "metaData='" + metaData + '\'' +
                 ", message='" + message + '\'' +
-                ", dateTime=" + dateTime + '\'' +
-                ", quotedMessage=" + quotedMessage + '\'' +
+                ", dateTime='" + dateTime + '\'' +
+                ", quotedMessage='" + quotedMessage + '\'' +
                 '}';
     }
 
