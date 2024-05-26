@@ -98,7 +98,7 @@ public class GenericOpenAiAssistantCommand implements BotCommand {
 
     @Override
     public boolean isPublic() {
-        return false;
+        return true;
     }
 
     @Override
