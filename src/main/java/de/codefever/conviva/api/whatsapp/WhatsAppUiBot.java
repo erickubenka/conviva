@@ -239,10 +239,18 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                                 sendMessage(command.beforeMessage());
                                             }
 
+                                            // For long quoted messages we search them in our own history to run commands with them
+                                            // if the message is not in our own history, we just use the snippet we have
+                                            if (newMessage.hasQuotedMessage()) {
+                                                final Message quotedMessageInHistory = messages.stream().filter(message -> message.getMessage().contains(newMessage.getQuotedMessage())).findFirst().orElse(null);
+                                                if (quotedMessageInHistory != null) {
+                                                    newMessage.setQuotedMessage(quotedMessageInHistory.getMessage());
+                                                }
+                                            }
+
                                             // run command
                                             // for normal commands, we pass a filtered message list and every keyword is removed
                                             // for commands that have a quoted message, we pass only the related message
-                                            // todo - may we can hook in here to check for the new message if they have a quoted message associated and then search for the quoted message in our list and associate them, because long quoted messages will be cut off
                                             final String commandOutput = newMessage.hasQuotedMessage() ?
                                                     command.run(new ArrayList<>(List.of(newMessage))) :
                                                     command.run(this.filterMessages());

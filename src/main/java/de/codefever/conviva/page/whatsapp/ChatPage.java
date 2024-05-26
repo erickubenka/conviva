@@ -234,6 +234,7 @@ public class ChatPage extends HomePage {
 
                             // be aware, that long quoted messages will be cut off, and only the first part will be displayed and associated with the message at this time
                             // To get the full message text of the quoted message, they will be handled afterward in the new message detection or even only when required for a specific BotCommand implementation
+                            // todo - may jump directly by click to quoted message and grab the full text
                             final String quotedMessageText = messageElement.find(By.cssSelector("span.quoted-mention")).expect().text().getActual();
                             log().info(String.format("Quoted message found, message: %s, quoted message: %s", textOfMessage, quotedMessageText));
                             message.setQuotedMessage(quotedMessageText);
