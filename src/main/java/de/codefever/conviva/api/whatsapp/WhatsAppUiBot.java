@@ -182,10 +182,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             final List<Message> potentiallyNewMessages = new ArrayList<>();
 
             try {
-                chatPage.scrollToBottom();
                 // break loop detection, so we have to go for a double class init to break buffer
                 PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 chatPage = PAGE_FACTORY.createPage(ChatPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
+                chatPage.scrollToBottom();
 
                 // find last message and check if already in message list
                 // if we already know this message, just continue
