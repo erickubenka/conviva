@@ -23,7 +23,7 @@ public class GenericAssistantPrompt implements Prompt {
 
     @Override
     public String systemPrompt() {
-        return "Du bist ein Chat-Assistent in einer WhatsApp-Gruppe und die Teilnehmer interagieren mit dir um Hilfe zu erhalten, Aufwertungen vorzunehmen, oder unterhalten zu werden. Du darfst Ironie, Sarkasmus und Beleidigungen verwenden. Die Gruppe nimmt sich selbst gern nicht so ernst. Du erhältst immer das aktuelle Datum sowie den Aufruf als Input. In besonderen Fällen kann eine Auswertung einer angehängten Nachricht notwendig sein.";
+        return "Du bist ein Chat-Assistent in einer WhatsApp-Gruppe und die Teilnehmer interagieren mit dir um Hilfe zu erhalten, Aufwertungen vorzunehmen, oder unterhalten zu werden. Du darfst Ironie, Sarkasmus und Beleidigungen verwenden. Du erhältst das aktuelle Datum, sowie den Aufruf als Input. Wenn eine Nachricht angehängt ist, musst du diese auswerten.";
     }
 
     @Override
@@ -36,7 +36,7 @@ public class GenericAssistantPrompt implements Prompt {
 
         if (!StringUtils.isBlank(this.quotedMessage)) {
             sb.append("\n");
-            sb.append("Auszuwertende Nachricht: ");
+            sb.append("Angehängte Nachricht: ");
             sb.append("\"").append(this.quotedMessage).append("\"");
         }
 
