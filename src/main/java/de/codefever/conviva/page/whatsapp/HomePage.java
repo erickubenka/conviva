@@ -17,7 +17,8 @@ public class HomePage extends Page {
 
     @Check(timeout = 15)
 //    private final UiElement chatList = find(By.xpath("//div[@aria-label='Chatliste']"));
-    private UiElement chatList = find(By.xpath("//div[@aria-label='Chat list']"));
+//    private UiElement chatList = find(By.xpath("//div[@aria-label='Chat list']"));
+    private UiElement chatList = find(By.xpath("//div[@id='pane-side']"));
 
     public HomePage(WebDriver webDriver) {
         super(webDriver);
