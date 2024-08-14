@@ -5,6 +5,9 @@ import de.codefever.conviva.page.whatsapp.ConnectWithNumberPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
 import de.codefever.conviva.page.whatsapp.LoginPage;
 import de.codefever.conviva.page.whatsapp.PhoneNumberVerificationPage;
+import eu.tsystems.mms.tic.testframework.utils.UITestUtils;
+
+import java.io.File;
 
 public class LoginWorkFlow implements WorkFlow<ChatPage> {
 
@@ -29,6 +32,7 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
                 final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 return homePage.openChat(this.chatName);
             } catch (Exception e) {
+                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_error.png"));
                 log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage(), e);
             }
         }

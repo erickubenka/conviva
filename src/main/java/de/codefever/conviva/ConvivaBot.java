@@ -10,7 +10,6 @@ import eu.tsystems.mms.tic.testframework.useragents.ChromeConfig;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 
-
 public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverManagerProvider {
 
     public static void main(String[] args) {
@@ -23,6 +22,8 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
                 options.addArguments("--disable-dev-shm-usage");
                 // https://github.com/puppeteer/puppeteer/issues/1914
                 options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.91 Safari/537.36");
+                options.addArguments("--disable-search-engine-choice-screen");
+
                 if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable", false)) {
                     options.addArguments("--user-data-dir=" + PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path", "/tmp/.conviva/"));
                 }
@@ -32,6 +33,9 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
         WEB_DRIVER_MANAGER.setUserAgentConfig(Browsers.chrome, new ChromeConfig() {
             @Override
             public void configure(ChromeOptions options) {
+
+                options.addArguments("--disable-search-engine-choice-screen");
+
                 if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable", false)) {
                     options.addArguments("--user-data-dir=" + PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path", "/tmp/.conviva/"));
                 }
