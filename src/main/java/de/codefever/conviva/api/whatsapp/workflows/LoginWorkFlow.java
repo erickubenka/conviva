@@ -32,6 +32,7 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
                 final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 return homePage.openChat(this.chatName);
             } catch (Exception e) {
+                log().info("Take Login Error Screenshot!");
                 UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_error.png"));
                 log().error("Error while trying to instantiate HomePage: {}. Will go for login instead.", e.getMessage(), e);
             }

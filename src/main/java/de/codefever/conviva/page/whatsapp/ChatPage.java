@@ -23,9 +23,9 @@ import java.util.List;
  */
 public class ChatPage extends HomePage {
 
-
     @Check
-    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @aria-label = 'Gib eine Nachricht ein.']"));
+    private final UiElement inputChat = find(By.xpath("//footer//div[@role='textbox']"));
+//    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @aria-label = 'Gib eine Nachricht ein.']"));
 
     private final UiElement buttonSend = find(By.xpath("//span[@data-icon='send']/..")); //
 
