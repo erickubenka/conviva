@@ -1,5 +1,5 @@
 ext {
-    testerraVersion = '2.8-SNAPSHOT'
+    testerraVersion = '2.8'
 }
 
 apply plugin: 'java-library'
