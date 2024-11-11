@@ -48,8 +48,8 @@ public class ChatPage extends HomePage {
             if (message.contains("\n")) {
                 final String[] lines = message.split("\n");
                 for (String line : lines) {
-                    actions.sendKeys(line);
-                    actions.keyDown(Keys.SHIFT).sendKeys(Keys.ENTER).keyUp(Keys.SHIFT);
+                    this.inputChat.findWebElement(webElement -> actions.sendKeys(webElement, line));
+                    this.inputChat.findWebElement(webElement -> actions.sendKeys(webElement, Keys.SHIFT, Keys.ENTER));
                 }
                 // actually send.
                 actions.build().perform();
