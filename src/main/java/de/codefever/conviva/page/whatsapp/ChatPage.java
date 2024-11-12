@@ -44,12 +44,13 @@ public class ChatPage extends HomePage {
 
         CONTROL.retryTimes(3, () -> {
             this.inputChat.clear();
+            this.inputChat.click();
             final Actions actions = new Actions(getWebDriver());
             if (message.contains("\n")) {
                 final String[] lines = message.split("\n");
-                for (String line : lines) {
-                    this.inputChat.findWebElement(webElement -> actions.sendKeys(webElement, line));
-                    this.inputChat.findWebElement(webElement -> actions.sendKeys(webElement, Keys.SHIFT, Keys.ENTER));
+                for (final String line : lines) {
+                    actions.sendKeys(line);
+                    actions.keyDown(Keys.SHIFT).sendKeys(Keys.ENTER).keyUp(Keys.SHIFT);
                 }
                 // actually send.
                 actions.build().perform();
@@ -58,8 +59,10 @@ public class ChatPage extends HomePage {
             }
         });
 
-        CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
-        buttonSend.click();
+        CONTROL.retryTimes(3, () -> {
+            CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
+            buttonSend.click();
+        });
 
         return createPage(ChatPage.class);
     }
@@ -186,6 +189,7 @@ public class ChatPage extends HomePage {
     public Message lastMessageOfList(final boolean includeOwnMessages) {
         final List<Message> foundMessages = this.visibleMessages(1, includeOwnMessages);
         if (!foundMessages.isEmpty()) {
+            foundMessages.sort(Comparator.comparing(Message::getDateTime).reversed());
             return foundMessages.get(0);
         }
 

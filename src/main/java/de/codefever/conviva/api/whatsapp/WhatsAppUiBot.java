@@ -1,6 +1,15 @@
 package de.codefever.conviva.api.whatsapp;
 
-import de.codefever.conviva.api.whatsapp.command.*;
+import de.codefever.conviva.api.whatsapp.command.BotCommand;
+import de.codefever.conviva.api.whatsapp.command.BugCommand;
+import de.codefever.conviva.api.whatsapp.command.GenericOpenAiAssistantCommand;
+import de.codefever.conviva.api.whatsapp.command.HelpCommand;
+import de.codefever.conviva.api.whatsapp.command.RestartCommand;
+import de.codefever.conviva.api.whatsapp.command.StatusCommand;
+import de.codefever.conviva.api.whatsapp.command.StopCommand;
+import de.codefever.conviva.api.whatsapp.command.SupCommand;
+import de.codefever.conviva.api.whatsapp.command.TldrCommand;
+import de.codefever.conviva.api.whatsapp.command.TopPostCommand;
 import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
 import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
@@ -198,6 +207,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
             // if we have potentially new messages, check them
             this.messages.sort(Comparator.comparing(Message::getDateTime));
+            potentiallyNewMessages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             if (!potentiallyNewMessages.isEmpty()) {
                 for (final Message newMessage : potentiallyNewMessages) {
                     if (!messages.contains(newMessage)) {
