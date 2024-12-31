@@ -18,7 +18,8 @@ public class LoginPage extends Page {
     //    @Check
 //    private UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button' and text()='Via Telefonnummer verknüpfen']"));
 //    private final UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button' and text()='Link with phone number']"));
-    private final UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button']"));
+//    private final UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button']"));
+    private final UiElement buttonConnectWithNumber = find(By.xpath("//span[@role='button']/*[contains(text(), 'Mit Telefonnummer anmelden') or contains(text(), 'Log in with phone number')]"));
 
     public LoginPage(WebDriver webDriver) {
         super(webDriver);

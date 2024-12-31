@@ -12,15 +12,13 @@ import org.openqa.selenium.WebDriver;
 public class ConnectWithNumberPage extends Page {
 
     @Check
-//    private UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Gib deine Telefonnummer ein.']"));
-    private final UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Type your phone number.']"));
+    private final UiElement inputPhoneNumber = find(By.xpath("//input[@aria-label='Type your phone number.' or @aria-label='Gib deine Telefonnummer ein.']"));
 
     @Check
-//    private UiElement buttonNext = find(By.xpath("//button//div[text()='Weiter']"));
-    private final UiElement buttonNext = find(By.xpath("//button//div[text()='Next']"));
+    private final UiElement buttonNext = find(By.xpath("//button//div[text()='Next' or text()='Weiter']"));
 
     @Check
-    private final UiElement selectCountryButton = find(By.xpath("//button//span[@data-icon='caret-down']"));
+    private final UiElement selectCountryButton = find(By.xpath("//button//span[@data-icon='chevron']"));
 
     public ConnectWithNumberPage(WebDriver webDriver) {
         super(webDriver);
