@@ -30,7 +30,10 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
             log().info("Using persistent user data directory: {}. Try to instantiate HomePage instead of LoginPage", PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path"));
             try {
                 final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
-                return homePage.openChat(this.chatName);
+                final ChatPage chatPage = homePage.openChat(this.chatName);
+                log().info("Screenshot successful login with persistent session.");
+                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_successful.png"));
+                return chatPage;
             } catch (Exception e) {
                 log().info("Take Login Error Screenshot!");
                 UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_error.png"));
@@ -44,10 +47,16 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
             connectWithNumberPage = connectWithNumberPage.selectCountry(PROPERTY_MANAGER.getProperty("conviva.auth.phone.country"));
             PhoneNumberVerificationPage phoneNumberVerificationPage = connectWithNumberPage.connectWithNumber(PROPERTY_MANAGER.getProperty("conviva.auth.phone.number"));
             final HomePage homePage = phoneNumberVerificationPage.waitForNumberVerified();
-            return homePage.openChat(this.chatName);
+            final ChatPage chatPage = homePage.openChat(this.chatName);
+            log().info("Screenshot successful login with phone number verification session.");
+            UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_successful.png"));
+            return chatPage;
         } else {
             final HomePage homePage = loginPage.waitForQrCodeScanned();
-            return homePage.openChat(this.chatName);
+            final ChatPage chatPage = homePage.openChat(this.chatName);
+            log().info("Screenshot successful login with QR code scanned");
+            UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_successful.png"));
+            return chatPage;
         }
     }
 

@@ -27,7 +27,7 @@ public class ChatPage extends HomePage {
     private final UiElement inputChat = find(By.xpath("//footer//div[@role='textbox']"));
 //    private final UiElement inputChat = find(By.xpath("//div[@role='textbox' and @aria-label = 'Gib eine Nachricht ein.']"));
 
-    private final UiElement buttonSend = find(By.xpath("//span[@data-icon='send']/..")); //
+    private final UiElement buttonSend = find(By.xpath("//span[@data-icon='send' or @data-icon='wds-ic-send-filled']/..")); //
 
     public ChatPage(WebDriver webDriver) {
         super(webDriver);
@@ -45,6 +45,7 @@ public class ChatPage extends HomePage {
         CONTROL.retryTimes(3, () -> {
             this.inputChat.clear();
             this.inputChat.click();
+
             final Actions actions = new Actions(getWebDriver());
             if (message.contains("\n")) {
                 final String[] lines = message.split("\n");
