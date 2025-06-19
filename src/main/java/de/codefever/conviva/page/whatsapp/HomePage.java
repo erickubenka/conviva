@@ -22,6 +22,12 @@ public class HomePage extends Page {
 
     public HomePage(WebDriver webDriver) {
         super(webDriver);
+        final ModalOverlayPage modalOverlay = createPage(ModalOverlayPage.class);
+
+        // we use a double negative here to reduce loads.
+        if (!modalOverlay.isModalOverlayNotDisplayed()) {
+            modalOverlay.closeModalOverlay(HomePage.class);
+        }
     }
 
     /**
