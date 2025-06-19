@@ -4,6 +4,7 @@ import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.ConnectWithNumberPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
 import de.codefever.conviva.page.whatsapp.LoginPage;
+import de.codefever.conviva.page.whatsapp.ModalOverlayPage;
 import de.codefever.conviva.page.whatsapp.PhoneNumberVerificationPage;
 import eu.tsystems.mms.tic.testframework.utils.UITestUtils;
 
@@ -29,6 +30,7 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
         if (PROPERTY_MANAGER.getBooleanProperty("conviva.chrome.userdata.persistent.enable")) {
             log().info("Using persistent user data directory: {}. Try to instantiate HomePage instead of LoginPage", PROPERTY_MANAGER.getProperty("conviva.chrome.userdata.persistent.path"));
             try {
+                handlePossibleModalOverlay();
                 final HomePage homePage = PAGE_FACTORY.createPage(HomePage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
                 final ChatPage chatPage = homePage.openChat(this.chatName);
                 log().info("Screenshot successful login with persistent session.");
@@ -47,16 +49,29 @@ public class LoginWorkFlow implements WorkFlow<ChatPage> {
             connectWithNumberPage = connectWithNumberPage.selectCountry(PROPERTY_MANAGER.getProperty("conviva.auth.phone.country"));
             PhoneNumberVerificationPage phoneNumberVerificationPage = connectWithNumberPage.connectWithNumber(PROPERTY_MANAGER.getProperty("conviva.auth.phone.number"));
             final HomePage homePage = phoneNumberVerificationPage.waitForNumberVerified();
+            handlePossibleModalOverlay();
             final ChatPage chatPage = homePage.openChat(this.chatName);
             log().info("Screenshot successful login with phone number verification session.");
             UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_successful.png"));
             return chatPage;
         } else {
             final HomePage homePage = loginPage.waitForQrCodeScanned();
+            handlePossibleModalOverlay();
             final ChatPage chatPage = homePage.openChat(this.chatName);
             log().info("Screenshot successful login with QR code scanned");
             UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/conviva_latest_login_successful.png"));
             return chatPage;
+        }
+    }
+
+    private void handlePossibleModalOverlay() {
+        final ModalOverlayPage modalOverlayPage = PAGE_FACTORY.createPage(ModalOverlayPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
+        log().info("ModalOverlayPage displayed: {}", modalOverlayPage.isModalOverlayDisplayed());
+
+        if (modalOverlayPage.isModalOverlayDisplayed()) {
+            modalOverlayPage.closeModalOverlay(HomePage.class);
+        } else {
+            log().info("Modal overlay is not displayed, continuing.");
         }
     }
 
