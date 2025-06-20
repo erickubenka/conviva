@@ -19,16 +19,7 @@ public class ModalOverlayPage extends Page {
      * @return {@link Boolean} true if the modal overlay is displayed, false otherwise.
      */
     public boolean isModalOverlayDisplayed() {
-        return modalOverlay.expect().present().is(true);
-    }
-
-    /**
-     * Checks if the modal overlay is not displayed.
-     *
-     * @return {@link Boolean} true if the modal overlay is not displayed, false otherwise.
-     */
-    public boolean isModalOverlayNotDisplayed() {
-        return modalOverlay.expect().present().is(false);
+        return modalOverlay.expect().present().getActual();
     }
 
     public <T extends Page> void closeModalOverlay(final Class<T> pageClass) {
