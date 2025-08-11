@@ -14,7 +14,7 @@ services:
     volumes:
       - /root/.conviva/userdata:/root/.conviva/userdata
       - /root/.conviva/conviva.properties:/app/conviva.properties
-      - /root/.conviva/tmp:/tmp
+      - /root/.conviva/tmp/img:/tmp/img
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     logging:

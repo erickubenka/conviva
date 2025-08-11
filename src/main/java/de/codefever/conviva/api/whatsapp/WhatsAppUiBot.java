@@ -24,8 +24,10 @@ import eu.tsystems.mms.tic.testframework.report.utils.IExecutionContextControlle
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
+import eu.tsystems.mms.tic.testframework.utils.UITestUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -318,6 +320,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                     totalMem,
                     freeMem,
                     totalMem - freeMem);
+
+            if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
+                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(), new File("/tmp/img/conviva_latest.png"));
+            }
         }
     }
 

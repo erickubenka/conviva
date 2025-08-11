@@ -6,14 +6,12 @@ import eu.tsystems.mms.tic.testframework.pageobjects.Check;
 import eu.tsystems.mms.tic.testframework.pageobjects.UiElement;
 import eu.tsystems.mms.tic.testframework.pageobjects.UiElementList;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
-import eu.tsystems.mms.tic.testframework.utils.UITestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -44,8 +42,6 @@ public class ChatPage extends HomePage {
      */
     public synchronized ChatPage sendMessage(final String message) {
 
-        UITestUtils.takeWebDriverScreenshotToFile(this.getWebDriver(), new File("/tmp/conviva_latest_send_message_screenshot_before.png"));
-
         CONTROL.retryTimes(3, () -> {
             this.inputChat.clear();
             this.inputChat.click();
@@ -62,19 +58,11 @@ public class ChatPage extends HomePage {
             } else {
                 inputChat.sendKeys(message);
             }
-        }, () -> {
-            // this is basically teh error block when the retry fails...
-            UITestUtils.takeWebDriverScreenshotToFile(this.getWebDriver(), new File("/tmp/conviva_latest_send_message_screenshot.png"));
-            this.getWebDriver().navigate().refresh();
         });
 
         CONTROL.retryTimes(3, () -> {
             CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
             buttonSend.click();
-        }, () -> {
-            // this is basically teh error block when the retry fails...
-            UITestUtils.takeWebDriverScreenshotToFile(this.getWebDriver(), new File("/tmp/conviva_latest_send_message_screenshot.png"));
-            this.getWebDriver().navigate().refresh();
         });
 
         return createPage(ChatPage.class);
