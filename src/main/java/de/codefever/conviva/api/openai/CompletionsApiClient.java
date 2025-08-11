@@ -33,7 +33,7 @@ public class CompletionsApiClient implements Loggable, PropertyManagerProvider {
     /**
      * OpenAI model to use for completions.
      */
-    private final static String OPENAI_MODEL = "gpt-5";
+    private final static String OPENAI_MODEL = PROPERTY_MANAGER.getProperty("conviva.openai.model", "gpt-4o");
 
     /**
      * Sends POST request to OpenAI API to get completion for given prompt.
