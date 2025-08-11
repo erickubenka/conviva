@@ -14,6 +14,7 @@ import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
 import de.codefever.conviva.model.whatsapp.Message;
 import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
+import de.codefever.conviva.page.whatsapp.ModalOverlayPage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.common.Testerra;
 import eu.tsystems.mms.tic.testframework.internal.Timings;
@@ -320,6 +321,12 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                     totalMem,
                     freeMem,
                     totalMem - freeMem);
+
+            // Sometimes the keyboard shortcut overlay appears. shit :D.
+            final ModalOverlayPage modalOverlayPage = PAGE_FACTORY.createPage(ModalOverlayPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
+            if(modalOverlayPage.isModalOverlayDisplayed()){
+                modalOverlayPage.closeModalOverlay(ChatPage.class);
+            }
 
             if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
                 UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/img/conviva_latest.png"));
