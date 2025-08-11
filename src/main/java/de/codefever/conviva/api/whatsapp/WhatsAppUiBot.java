@@ -322,7 +322,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                     totalMem - freeMem);
 
             if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
-                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(), new File("/tmp/img/conviva_latest.png"));
+                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/img/conviva_latest.png"));
             }
         }
     }
