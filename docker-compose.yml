@@ -10,7 +10,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2048M
+          memory: 4096M
     volumes:
       - /root/.conviva/userdata:/root/.conviva/userdata
       - /root/.conviva/conviva.properties:/app/conviva.properties
