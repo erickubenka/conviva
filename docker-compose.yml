@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  conviva-bot:
+    image: ghcr.io/erickubenka/conviva:main
+    container_name: conviva-bot
+    restart: always
+    tty: true
+    stdin_open: true
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+    volumes:
+      - /root/.conviva/userdata:/root/.conviva/userdata
+      - /root/.conviva/conviva.properties:/app/conviva.properties
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://10.5.0.2:3100/loki/api/v1/push"
