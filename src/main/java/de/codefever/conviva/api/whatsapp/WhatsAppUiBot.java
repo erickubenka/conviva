@@ -166,6 +166,13 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
         log().info("Starting Bot {} in chat {} at {}.", BOT_NAME, chatName, startTime);
         this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
+
+        // Create new Thread here to track state of current bot
+        if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
+            this.getScreenShotThread().start();
+        }
+
+        // ### START ###
         ChatPage chatPage = new LoginWorkFlow(chatName, webDriverUUID).run();
 
         // init messages and get rid of old stuff.
@@ -324,14 +331,33 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
 
             // Sometimes the keyboard shortcut overlay appears. shit :D.
             final ModalOverlayPage modalOverlayPage = PAGE_FACTORY.createPage(ModalOverlayPage.class, WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID));
-            if(modalOverlayPage.isModalOverlayDisplayed()){
+            if (modalOverlayPage.isModalOverlayDisplayed()) {
                 modalOverlayPage.closeModalOverlay(ChatPage.class);
             }
-
-            if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
-                UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/img/conviva_latest.png"));
-            }
         }
+    }
+
+    /**
+     * Creates a simple thread that will take screenshot every  hit on interval
+     *
+     * @return Thread
+     */
+    private Thread getScreenShotThread() {
+        final Thread screenShotThread = new Thread(() -> {
+            log().info("Starting screenshot thread for bot {} in chat {}.", BOT_NAME, chatName);
+            int interval = Integer.parseInt(PROPERTY_MANAGER.getProperty("conviva.bot.screenshot.interval.ms", "10000"));
+
+            while (true) {
+                try {
+                    TimerUtils.sleep(interval, "Taking screenshot every 10 seconds.");
+                    UITestUtils.takeWebDriverScreenshotToFile(WEB_DRIVER_MANAGER.getWebDriver(this.webDriverUUID), new File("/tmp/img/conviva_latest.png"));
+                } catch (Exception e) {
+                    log().error("Error while taking screenshot: {}", e.getMessage());
+                }
+            }
+        });
+        screenShotThread.setName("screenshot-1");
+        return screenShotThread;
     }
 
     /**
