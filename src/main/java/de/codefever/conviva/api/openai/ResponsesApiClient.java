@@ -16,17 +16,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Client for OpenAI API to get completions for given prompts.
- *
- * @deprecated - Please use {@link ResponsesApiClient} instead.
+ * Client for OpenAI API to get responses for given prompts.
+ * <a href="https://platform.openai.com/docs/api-reference/responses/create">...</a>
  */
-@Deprecated(since = "2025-09-12")
-public class CompletionsApiClient implements Loggable, PropertyManagerProvider {
+public class ResponsesApiClient implements Loggable, PropertyManagerProvider {
 
     /**
      * OpenAI API URL and API key.
      */
-    private final static String API_URL = "https://api.openai.com/v1/chat/completions";
+    private final static String API_URL = "https://api.openai.com/v1/responses";
 
     /**
      * OpenAI API key
@@ -34,43 +32,42 @@ public class CompletionsApiClient implements Loggable, PropertyManagerProvider {
     private final static String API_KEY = PROPERTY_MANAGER.getProperty("conviva.openai.api.key");
 
     /**
-     * OpenAI model to use for completions.
+     * OpenAI model to use for responses.
      */
     private final static String OPENAI_MODEL = PROPERTY_MANAGER.getProperty("conviva.openai.model", "gpt-4o");
 
     /**
-     * Sends POST request to OpenAI API to get completion for given prompt.
+     * Sends POST request to OpenAI API to get response for given prompt.
      *
      * @param prompt {@link Prompt}
      * @return String
      */
-    public String postCompletion(Prompt prompt) {
+    public String postResponseRequest(Prompt prompt) {
+
+        /*
+         * curl https://api.openai.com/v1/responses \
+         *   -H "Content-Type: application/json" \
+         *   -H "Authorization: Bearer $OPENAI_API_KEY" \
+         *   -d '{
+         *     "model": "gpt-4.1",
+         *     "tools": [{ "type": "web_search_preview" }],
+         *     "reasoning": {"effort": "low"},
+         *      "instructions": "Talk like a pirate.",
+         *     "input": "What was a positive news story from today?"
+         *   }'
+         */
 
         final JSONObject jsonBody = new JSONObject();
         jsonBody.put("model", OPENAI_MODEL);
 
-        final JSONObject systemPromptMessageObject = new JSONObject();
-        final JSONArray systemPromptContentArray = new JSONArray();
-        final JSONObject systemPromptContentObject = new JSONObject();
-        systemPromptMessageObject.put("role", "system");
-        systemPromptContentObject.put("type", "text");
-        systemPromptContentObject.put("text", prompt.systemPrompt());
-        systemPromptContentArray.put(systemPromptContentObject);
-        systemPromptMessageObject.put("content", systemPromptContentArray);
+        final JSONArray toolsList = new JSONArray();
+        final JSONObject toolsListObjectWebSearch = new JSONObject();
+        toolsListObjectWebSearch.put("type", "web_search_preview");
+        toolsList.put(toolsListObjectWebSearch);
+        jsonBody.put("tools", toolsList);
 
-        final JSONObject userPromptMessageObject = new JSONObject();
-        final JSONArray userPromptContentArray = new JSONArray();
-        final JSONObject userPromptContentObject = new JSONObject();
-        userPromptContentObject.put("type", "text");
-        userPromptContentObject.put("text", prompt.userPrompt());
-        userPromptContentArray.put(userPromptContentObject);
-        userPromptMessageObject.put("role", "user");
-        userPromptMessageObject.put("content", userPromptContentArray);
-
-        final JSONArray messagesArray = new JSONArray();
-        messagesArray.put(systemPromptMessageObject);
-        messagesArray.put(userPromptMessageObject);
-        jsonBody.put("messages", messagesArray);
+        jsonBody.put("instructions", prompt.systemPrompt());
+        jsonBody.put("input", prompt.userPrompt());
 
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpPost httpPost = new HttpPost(API_URL);
@@ -95,13 +92,22 @@ public class CompletionsApiClient implements Loggable, PropertyManagerProvider {
             }
             in.close();
 
-            log().info("Response: " + response);
+            log().info("OpenAI Response: " + response);
             JSONObject jsonResponse = new JSONObject(response.toString());
-            if (jsonResponse.has("choices")) {
-                log().info("Completion: " + jsonResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content"));
-                return jsonResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
+            if (jsonResponse.has("output")) {
+                // search for the object in output response array that have type "message"
+                for (int i = 0; i < jsonResponse.getJSONArray("output").length(); i++) {
+                    final JSONObject outputObject = jsonResponse.getJSONArray("output").getJSONObject(i);
+                    if (outputObject.has("type") && outputObject.getString("type").equals("message")) {
+                        final String messageText = outputObject.getJSONArray("content").getJSONObject(0).getString("text");
+                        log().info("Found response of type message: " + messageText);
+                        return messageText;
+                    }
+                }
+                log().error("The OpenAI response did not contain a output object of type message.");
+                return null;
             } else {
-                log().error("No completion found.");
+                log().error("OpenAI Response did not contain output object.");
                 return null;
             }
 

@@ -1,7 +1,7 @@
 package de.codefever.conviva.api.whatsapp.command;
 
 
-import de.codefever.conviva.api.openai.CompletionsApiClient;
+import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.prompt.SingleMessageSummaryPrompt;
 import de.codefever.conviva.api.whatsapp.prompt.SummaryPrompt;
 import de.codefever.conviva.model.openai.Prompt;
@@ -34,7 +34,7 @@ public class TldrCommand implements BotCommand {
 
         final Prompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new SingleMessageSummaryPrompt(callToCommand.getQuotedMessage()) : new SummaryPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());
-        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: {}", summary);
         return summary;
     }

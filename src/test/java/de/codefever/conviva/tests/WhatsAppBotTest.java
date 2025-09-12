@@ -2,7 +2,9 @@ package de.codefever.conviva.tests;
 
 import de.codefever.conviva.AbstractTest;
 import de.codefever.conviva.api.openai.CompletionsApiClient;
+import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;
+import de.codefever.conviva.api.whatsapp.prompt.GenericAssistantPrompt;
 import de.codefever.conviva.api.whatsapp.prompt.SummaryPrompt;
 import de.codefever.conviva.model.openai.Prompt;
 import de.codefever.conviva.model.whatsapp.Message;
@@ -73,7 +75,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
     }
 
     @Test
-    public void testT02_ChatGPT() {
+    public void testT02_ChatGPT_CompletionsApi() {
 
         final String sayThisIsATest = new CompletionsApiClient().postCompletion(new Prompt() {
             @Override
@@ -120,7 +122,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
 
 
         final SummaryPrompt prompt = new SummaryPrompt(messages);
-        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
     }
 
@@ -131,7 +133,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
         List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
         final SummaryPrompt prompt = new SummaryPrompt(messages);
-        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
     }
 
@@ -143,11 +145,38 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
 
         List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
         final SummaryPrompt prompt = new SummaryPrompt(messages);
-        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
 
         chatPage = chatPage.openChat("Eric Kubenka");
         chatPage = chatPage.sendMessage(summary);
+    }
+
+    @Test
+    public void testT06_ChatGPT_ResponseApi() {
+
+        final String sayThisIsATest = new ResponsesApiClient().postResponseRequest(new Prompt() {
+            @Override
+            public String systemPrompt() {
+                return "You are a echo bot, and repeat everything you received from me.";
+            }
+
+            @Override
+            public String userPrompt() {
+                return "Say this is a test";
+            }
+        });
+
+        log().info("GPT: " + sayThisIsATest);
+    }
+
+    @Test
+    public void testT07_ChatGPT_ResponseApi_Advanced() {
+
+        final String genericPromptResponse = new ResponsesApiClient().postResponseRequest(new GenericAssistantPrompt("Bitte denk ganz genau nach bevor du antwortest. Es mir äußerst wichtig, dass du mir das richtige Datum des folgenden Spiels und das Ergebnis nennen kannst. Bitte gib deine Quelle zu dem Ergebnis an.\n" +
+                "Wann fand das letzte Bundesligaspiel zwischen dem FC Bayern München und dem TSV 1860 München statt und wie ging es aus? Wie gesagt, bitte denk ganz genau nach, bevor du antwortest."));
+
+        log().info("GPT: " + genericPromptResponse);
     }
 
     @Test

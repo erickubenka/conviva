@@ -1,7 +1,7 @@
 package de.codefever.conviva.model.openai;
 
 /**
- * Interface for prompt to OpenAI completions API with {@link de.codefever.conviva.api.openai.CompletionsApiClient}
+ * Interface for prompt to OpenAI completions API with {@link de.codefever.conviva.api.openai.ResponsesApiClient}
  */
 public interface Prompt {
 

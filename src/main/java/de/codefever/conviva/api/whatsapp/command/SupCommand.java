@@ -1,6 +1,6 @@
 package de.codefever.conviva.api.whatsapp.command;
 
-import de.codefever.conviva.api.openai.CompletionsApiClient;
+import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.prompt.SupPrompt;
 import de.codefever.conviva.model.whatsapp.Message;
 
@@ -35,7 +35,7 @@ public class SupCommand implements BotCommand {
 
         final SupPrompt prompt = new SupPrompt(messages);
         log().info("Prompt: {}", prompt.userPrompt());
-        final String summary = new CompletionsApiClient().postCompletion(prompt);
+        final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("SUP: {}", summary);
         return summary;
     }

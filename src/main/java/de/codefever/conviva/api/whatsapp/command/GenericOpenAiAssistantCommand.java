@@ -1,6 +1,6 @@
 package de.codefever.conviva.api.whatsapp.command;
 
-import de.codefever.conviva.api.openai.CompletionsApiClient;
+import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.prompt.GenericAssistantPrompt;
 import de.codefever.conviva.model.whatsapp.Message;
 
@@ -61,7 +61,7 @@ public class GenericOpenAiAssistantCommand implements BotCommand {
         final GenericAssistantPrompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new GenericAssistantPrompt(userPrompt, callToCommand.getQuotedMessage()) : new GenericAssistantPrompt(userPrompt);
 
         log().info("Prompt: {}", prompt.userPrompt());
-        final String response = new CompletionsApiClient().postCompletion(prompt);
+        final String response = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("GenericAssistant: {}", response);
 
         return response;
