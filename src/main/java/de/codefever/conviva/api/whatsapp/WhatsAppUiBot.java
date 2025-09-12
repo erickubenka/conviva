@@ -309,6 +309,11 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                             if (newMessage.getMessage().contains("@" + BOT_NAME)) {
                                 log().info("Highlight: {}", newMessage.getMessage());
                             }
+
+                            // group name detection - todo - for future commands
+                            // When a div role=button and text() = "hat den Gruppennamen zu" exists, read Span for new group name.
+                            // <div role="button"><div class="irrelevant"><div class="irrelevant"><span dir="auto" class="irrelevant" style="min-height: 0px;">Author Name</span></div></div> hat den Gruppennamen zu „<span dir="auto" class="irrelevant" style="min-height: 0px;">Richtig analierende F_icker</span>“ geändert.</div>
+
                         } else {
                             log().debug("Did not try to parse message into a bot command because it was sent {} before the bot started {}.", newMessage.getDateTime(), startTime);
                         }
