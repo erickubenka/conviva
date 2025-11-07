@@ -58,10 +58,10 @@ public class ChatPage extends HomePage {
             } else {
                 inputChat.sendKeys(message);
             }
-            
-            // Check if modal overlay appeared during message input and close it
-            this.closeModalOverlayIfDisplayed();
         });
+        
+        // Check if modal overlay appeared during message input and close it
+        this.closeModalOverlayIfDisplayed();
 
         CONTROL.retryTimes(3, () -> {
             CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
