@@ -58,14 +58,32 @@ public class ChatPage extends HomePage {
             } else {
                 inputChat.sendKeys(message);
             }
+            
+            // Check if modal overlay appeared during message input and close it
+            this.closeModalOverlayIfDisplayed();
         });
 
         CONTROL.retryTimes(3, () -> {
             CONTROL.waitFor(5, () -> buttonSend.expect().displayed());
             buttonSend.click();
         });
+        
+        // Check again after clicking send button
+        this.closeModalOverlayIfDisplayed();
 
         return createPage(ChatPage.class);
+    }
+    
+    /**
+     * Checks if the modal overlay (e.g., keyboard shortcuts) is displayed and closes it if present.
+     * This prevents the modal from blocking further message input.
+     */
+    private void closeModalOverlayIfDisplayed() {
+        final ModalOverlayPage modalOverlayPage = createPage(ModalOverlayPage.class);
+        if (modalOverlayPage.isModalOverlayDisplayed()) {
+            log().info("Modal overlay detected, closing it.");
+            modalOverlayPage.closeModalOverlay(ChatPage.class);
+        }
     }
 
     /**
