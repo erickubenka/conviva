@@ -1,4 +1,4 @@
-FROM openjdk:23-jdk-bookworm
+FROM openjdk:25-ea-25-jdk-bookworm
 LABEL author="Eric Kubenka<code@code-fever.de>"
 
 # Google Chrome
