@@ -45,11 +45,11 @@ public class ConnectWithNumberPage extends Page {
     public ConnectWithNumberPage selectCountry(final String country) {
         selectCountryButton.click();
 
-        final UiElement searchCountryInput = find(By.xpath("//span[@data-icon='search']/../..//div[@role='textbox']"));
+        final UiElement searchCountryInput = find(By.xpath("//span[@data-icon='search-refreshed-thin']/../..//div[@role='textbox']"));
         searchCountryInput.expect().present().is(true);
         searchCountryInput.sendKeys(country);
 
-        final UiElement buttonListItemCountry = find(By.xpath("//button[@role='listitem']//div[text()='" + country + "']"));
+        final UiElement buttonListItemCountry = find(By.xpath("//button[@role='listitem']//span[text()='" + country + "']"));
         buttonListItemCountry.expect().displayed().is(true);
         buttonListItemCountry.click();
 

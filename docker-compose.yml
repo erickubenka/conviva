@@ -12,9 +12,9 @@ services:
         limits:
           memory: 4096M
     volumes:
-      - /root/.conviva/userdata:/root/.conviva/userdata
-      - /root/.conviva/conviva.properties:/app/conviva.properties
-      - /root/.conviva/tmp/img:/tmp/img
+      - /home/erku/.conviva/userdata:/root/.conviva/userdata
+      - /home/erku/.conviva/conviva.properties:/app/conviva.properties
+      - /home/erku/.conviva/tmp/img:/tmp/img
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     logging:
