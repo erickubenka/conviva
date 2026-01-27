@@ -1,7 +1,7 @@
 package de.codefever.conviva.api.whatsapp.command;
 
+import de.codefever.conviva.api.general.prompt.SupPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.api.whatsapp.prompt.SupPrompt;
 import de.codefever.conviva.model.whatsapp.Message;
 
 import java.util.List;

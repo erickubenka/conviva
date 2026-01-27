@@ -1,6 +1,6 @@
 package de.codefever.conviva;
 
-import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;
+import de.codefever.conviva.api.signal.SignalApiBot;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.constants.Browsers;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
@@ -48,8 +48,11 @@ public class ConvivaBot implements Loggable, PropertyManagerProvider, WebDriverM
 //        devTools.send(Emulation.setTimezoneOverride("Europe/Berlin"));
 
         JVMMonitor.stop();
-        final WhatsAppUiBot whatsAppUiBot = new WhatsAppUiBot();
-        whatsAppUiBot.run();
+//        final WhatsAppUiBot whatsAppUiBot = new WhatsAppUiBot();
+//        whatsAppUiBot.run();
+
+        final SignalApiBot signalApiBot = new SignalApiBot();
+        signalApiBot.run();
 
         // final exit
         WEB_DRIVER_MANAGER.requestShutdownAllSessions();

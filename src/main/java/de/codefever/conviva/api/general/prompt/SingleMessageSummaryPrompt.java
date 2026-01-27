@@ -1,4 +1,4 @@
-package de.codefever.conviva.api.whatsapp.prompt;
+package de.codefever.conviva.api.general.prompt;
 
 import de.codefever.conviva.model.openai.Prompt;
 
