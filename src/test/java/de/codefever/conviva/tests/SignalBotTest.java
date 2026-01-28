@@ -1,9 +1,12 @@
 package de.codefever.conviva.tests;
 
 import de.codefever.conviva.AbstractTest;
+import de.codefever.conviva.api.signal.EventBus;
 import de.codefever.conviva.api.signal.SignalCliRestApiClient;
+import de.codefever.conviva.api.signal.SignalWebSocketClient;
 import de.codefever.conviva.model.signal.Configuration;
 import de.codefever.conviva.model.signal.Message;
+import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -31,5 +34,22 @@ public class SignalBotTest extends AbstractTest {
 
         final SignalCliRestApiClient signalCliRestApiClient = new SignalCliRestApiClient();
         signalCliRestApiClient.postSendMessage("Test from Automated Test", "+4915142324728");
+    }
+
+    @Test
+    public void testT04_GetLatestMessagesWebSocket() {
+        final SignalWebSocketClient signalWebSocketClient = new SignalWebSocketClient();
+        signalWebSocketClient.start();
+
+        int timeoutInMs = 2 * 60 * 1000;
+
+        EventBus.getInstance().subscribe(msg -> {
+            log().info("Received message via WebSocket: {}", msg.toString());
+        });
+
+        while (timeoutInMs > 0) {
+            TimerUtils.sleep(1000, "Waiting for messages...");
+            timeoutInMs -= 1000;
+        }
     }
 }

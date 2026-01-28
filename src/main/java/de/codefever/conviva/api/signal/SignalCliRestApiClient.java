@@ -106,8 +106,10 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
      * Read latest messages from account using:
      * http://<API_URL>/v1/receive/<PHONE_NUMBER>
      *
-     * @return
+     * @return {@link List} of {@link Message}
+     * @deprecated since we use Signal CLI Rest API in WebSocket mode now. Use {@link SignalWebSocketClient} instead.
      */
+    @Deprecated(since = "2026-01-18")
     public List<Message> getLatestMessages() {
 
         final List<Message> messages = new ArrayList<>();
