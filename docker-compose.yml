@@ -10,7 +10,7 @@ services:
     volumes:
       - /home/erku/.conviva/signal-api:/home/.local/share/signal-cli
     environment:
-      - MODE=native
+      - MODE=json-rpc
     logging:
       driver: loki
       options:
