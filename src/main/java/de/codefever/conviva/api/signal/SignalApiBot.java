@@ -125,54 +125,58 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
         // register and handle incoming messages.
         EventBus.getInstance().subscribe(msg -> {
 
-            // filter everything that is not from the configured group.
-            if (msg.isFromGroup() && !msg.getGroupInfo().getGroupId().equals(group.getInternalId())) {
-                return;
-            }
-
-            // filter everything that is null
-            if(!msg.hasMessage()){
-                return;
-            }
-
-            this.messages.add(msg);
-            this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-            this.messages.sort(Comparator.comparing(Message::getDateTime));
-
-            if (msg.getDateTime().isAfter(startTime)) {
-                for (final BotCommand command : this.commands) {
-                    if (msg.getMessage() != null && msg.getMessage().trim().toLowerCase().startsWith(command.command())) {
-
-                        // threaded commands ...
-                        if (command.isRunInThread()) {
-                            final Thread thread = new Thread(() -> {
-                                log().info("Running Thread: {}", Thread.currentThread().getName());
-
-                                // anything to say before run a potential heavy-load command?
-                                if (!StringUtils.isBlank(command.beforeMessage())) {
-                                    signalCliRestApiClient.postSendMessage(command.beforeMessage(), BOT_RECIPIENT);
-                                }
-
-                                // run command
-                                final String commandOutput = command.run(msg, this.filterMessages());
-                                if (!StringUtils.isBlank(commandOutput)) {
-                                    signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, BOT_RECIPIENT);
-                                }
-
-                                // anything to say after this command?
-                                if (!StringUtils.isBlank(command.afterMessage())) {
-                                    signalCliRestApiClient.postSendMessage(command.afterMessage(), BOT_RECIPIENT);
-                                }
-                            });
-
-                            long sameCommandThreadCount = threads.stream().filter(t -> t.getName().equals(command.command())).count();
-                            thread.setName(command.command() + "-" + sameCommandThreadCount);
-                            threads.add(thread);
-                            thread.start();
-                        }
-                    }
-                    break;
+            try {
+                // filter everything that is not from the configured group.
+                if (msg.isFromGroup() && !msg.getGroupInfo().getGroupId().equals(group.getInternalId())) {
+                    return;
                 }
+
+                // filter everything that is null
+                if (!msg.hasMessage()) {
+                    return;
+                }
+
+                this.messages.add(msg);
+                this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+                this.messages.sort(Comparator.comparing(Message::getDateTime));
+
+                if (msg.getDateTime().isAfter(startTime)) {
+                    for (final BotCommand command : this.commands) {
+                        if (msg.getMessage() != null && msg.getMessage().trim().toLowerCase().startsWith(command.command())) {
+
+                            // threaded commands ...
+                            if (command.isRunInThread()) {
+                                final Thread thread = new Thread(() -> {
+                                    log().info("Running Thread: {}", Thread.currentThread().getName());
+
+                                    // anything to say before run a potential heavy-load command?
+                                    if (!StringUtils.isBlank(command.beforeMessage())) {
+                                        signalCliRestApiClient.postSendMessage(command.beforeMessage(), BOT_RECIPIENT);
+                                    }
+
+                                    // run command
+                                    final String commandOutput = command.run(msg, this.filterMessages());
+                                    if (!StringUtils.isBlank(commandOutput)) {
+                                        signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, BOT_RECIPIENT);
+                                    }
+
+                                    // anything to say after this command?
+                                    if (!StringUtils.isBlank(command.afterMessage())) {
+                                        signalCliRestApiClient.postSendMessage(command.afterMessage(), BOT_RECIPIENT);
+                                    }
+                                });
+
+                                long sameCommandThreadCount = threads.stream().filter(t -> t.getName().equals(command.command())).count();
+                                thread.setName(command.command() + "-" + sameCommandThreadCount);
+                                threads.add(thread);
+                                thread.start();
+                            }
+                        }
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                log().error("Error processing incoming message: {}", e.getMessage());
             }
         });
 
