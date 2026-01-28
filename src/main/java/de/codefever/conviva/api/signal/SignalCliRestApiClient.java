@@ -8,17 +8,14 @@ import de.codefever.conviva.model.signal.Message;
 import de.codefever.conviva.model.signal.QuotedMessage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,29 +32,21 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
 
     public Configuration getConfiguration() {
 
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet(API_URL + "v1/configuration");
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL + "v1/configuration"))
+                .build();
 
         try {
-            HttpResponse httpResponse = httpClient.execute(httpGet);
-            log().info("Response Code: " + httpResponse.getStatusLine().getStatusCode());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log().info("Response Code: {}", response.statusCode());
+            log().info("Signal CLI REST API Response: {}", response.body());
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            log().info("Signal CLI REST API Response: " + response);
-            final JSONObject jsonResponse = new JSONObject(response.toString());
-
+            final JSONObject jsonResponse = new JSONObject(response.body());
             final Configuration configuration = new Configuration();
 
             if (jsonResponse.has("logging")) {
                 final JSONObject loggingObject = jsonResponse.getJSONObject("logging");
-
 
                 if (loggingObject.has("Level")) {
                     final String level = loggingObject.getString("Level");
@@ -67,8 +56,7 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
                 }
                 return configuration;
             }
-
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -79,23 +67,17 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
 
         final List<Group> groups = new ArrayList<>();
 
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet(API_URL + "v1/groups/" + PHONE_PREFIX + PHONE_NUMBER);
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL + "v1/groups/" + PHONE_PREFIX + PHONE_NUMBER))
+                .build();
 
         try {
-            final HttpResponse httpResponse = httpClient.execute(httpGet);
-            log().info("Response Code: " + httpResponse.getStatusLine().getStatusCode());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log().info("Response Code: {}", response.statusCode());
+            log().info("Signal CLI REST API Response: {}", response.body());
 
-            final BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            log().info("Signal CLI REST API Response: " + response);
-            final JSONArray jsonResponse = new JSONArray(response.toString());
+            final JSONArray jsonResponse = new JSONArray(response.body());
 
             for (int i = 0; i < jsonResponse.length(); i++) {
                 final JSONObject groupObject = jsonResponse.getJSONObject(i);
@@ -113,7 +95,7 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
                 groups.add(group);
             }
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -130,23 +112,17 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
 
         final List<Message> messages = new ArrayList<>();
 
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet(API_URL + "v1/receive/" + PHONE_PREFIX + PHONE_NUMBER);
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL + "v1/receive/" + PHONE_PREFIX + PHONE_NUMBER))
+                .build();
 
         try {
-            final HttpResponse httpResponse = httpClient.execute(httpGet);
-            log().info("Response Code: " + httpResponse.getStatusLine().getStatusCode());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log().info("Response Code: {}", response.statusCode());
+            log().info("Signal CLI REST API Response: {}", response.body());
 
-            final BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            log().info("Signal CLI REST API Response: " + response);
-            JSONArray jsonResponse = new JSONArray(response.toString());
+            final JSONArray jsonResponse = new JSONArray(response.body());
 
             for (int i = 0; i < jsonResponse.length(); i++) {
                 final JSONObject messageObject = jsonResponse.getJSONObject(i);
@@ -200,7 +176,7 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
                     messages.add(message);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -220,45 +196,33 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
         recipientsArray.put(recipient);
         jsonBody.put("recipients", recipientsArray);
 
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(API_URL + "v2/send");
-        httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
-        httpPost.setHeader("Accept", "application/json");
-
-        StringEntity stringEntity = new StringEntity(jsonBody.toString(), StandardCharsets.UTF_8);
-        stringEntity.setContentEncoding("UTF-8");
-        stringEntity.setContentType("application/json");
-        httpPost.setEntity(stringEntity);
+        final HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL + "v2/send"))
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString(), StandardCharsets.UTF_8))
+                .build();
 
         try {
-            HttpResponse httpResponse = httpClient.execute(httpPost);
-            log().info("Response Code: " + httpResponse.getStatusLine().getStatusCode());
+            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log().info("Response Code: {}", response.statusCode());
+            log().info("Signal CLI REST API Response: {}", response.body());
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            log().info("Signal CLI REST API Response: " + response);
-            JSONObject jsonResponse = new JSONObject(response.toString());
+            final JSONObject jsonResponse = new JSONObject(response.body());
             if (jsonResponse.has("timestamp")) {
-                String timestamp = jsonResponse.getString("timestamp");
+                final String timestamp = jsonResponse.getString("timestamp");
 
                 // convert timestamp to human readable date
-
-                Date date = new Date(Long.parseLong(timestamp));
-                DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                final Date date = new Date(Long.parseLong(timestamp));
+                final DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
                 format.setTimeZone(TimeZone.getTimeZone(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target")));
-                String formatted = format.format(date);
+                final String formatted = format.format(date);
                 log().info("Message sent at timestamp: {}", formatted);
             } else {
                 log().error("Signal CLI REST API Response did not contain timestamp.");
             }
-
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
