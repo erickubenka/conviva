@@ -11,6 +11,7 @@ import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import eu.tsystems.mms.tic.testframework.report.model.context.ExecutionContext;
 import eu.tsystems.mms.tic.testframework.report.model.context.LogMessage;
 import eu.tsystems.mms.tic.testframework.report.utils.IExecutionContextController;
+import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
@@ -118,79 +119,72 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
         final List<Group> groups = signalCliRestApiClient.getGroups();
         final Group group = groups.stream().filter(g -> g.getId().equals(BOT_GROUP_ID)).findFirst().get();
 
-        // init with all unread.
-        final List<Message> initialMessages = signalCliRestApiClient.getLatestMessages();
+        final SignalWebSocketClient signalWebSocketClient = new SignalWebSocketClient();
+        signalWebSocketClient.start();
 
-        // filter for messages from the intended group only.
-        initialMessages.removeIf(m -> {
-            if (!m.isFromGroup()) {
-                return true;
-            } else {
-                return !m.getGroupInfo().getGroupId().equals(group.getInternalId());
+        // register and handle incoming messages.
+        EventBus.getInstance().subscribe(msg -> {
+
+            // filter everything that is not from the configured group.
+            if (msg.isFromGroup() && !msg.getGroupInfo().getGroupId().equals(group.getInternalId())) {
+                return;
+            }
+
+            // filter everything that is null
+            if(!msg.hasMessage()){
+                return;
+            }
+
+            this.messages.add(msg);
+            this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+            this.messages.sort(Comparator.comparing(Message::getDateTime));
+
+            if (msg.getDateTime().isAfter(startTime)) {
+                for (final BotCommand command : this.commands) {
+                    if (msg.getMessage() != null && msg.getMessage().trim().toLowerCase().startsWith(command.command())) {
+
+                        // threaded commands ...
+                        if (command.isRunInThread()) {
+                            final Thread thread = new Thread(() -> {
+                                log().info("Running Thread: {}", Thread.currentThread().getName());
+
+                                // anything to say before run a potential heavy-load command?
+                                if (!StringUtils.isBlank(command.beforeMessage())) {
+                                    signalCliRestApiClient.postSendMessage(command.beforeMessage(), BOT_RECIPIENT);
+                                }
+
+                                // run command
+                                final String commandOutput = command.run(msg, this.filterMessages());
+                                if (!StringUtils.isBlank(commandOutput)) {
+                                    signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, BOT_RECIPIENT);
+                                }
+
+                                // anything to say after this command?
+                                if (!StringUtils.isBlank(command.afterMessage())) {
+                                    signalCliRestApiClient.postSendMessage(command.afterMessage(), BOT_RECIPIENT);
+                                }
+                            });
+
+                            long sameCommandThreadCount = threads.stream().filter(t -> t.getName().equals(command.command())).count();
+                            thread.setName(command.command() + "-" + sameCommandThreadCount);
+                            threads.add(thread);
+                            thread.start();
+                        }
+                    }
+                    break;
+                }
             }
         });
 
-        this.messages.addAll(initialMessages);
-        this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-        this.messages.sort(Comparator.comparing(Message::getDateTime));
-
+        // while loop to keep everything alive.
         boolean stop = false;
         while (!stop) {
-            final List<Message> latestMessages = signalCliRestApiClient.getLatestMessages();
-
-            // new messages
-            if (latestMessages != null && !latestMessages.isEmpty()) {
-                log().info("Fetched {} new messages from Signal API.", latestMessages.size());
-                this.messages.addAll(latestMessages);
-                this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-                this.messages.sort(Comparator.comparing(Message::getDateTime));
-
-                // iterate over all latest messages to check if a command was called.
-                for (final Message newMessage : latestMessages) {
-                    if (newMessage.getDateTime().isAfter(startTime)) {
-                        for (final BotCommand command : this.commands) {
-                            if (newMessage.getMessage() != null && newMessage.getMessage().trim().toLowerCase().startsWith(command.command())) {
-
-                                // threaded commands ...
-                                if (command.isRunInThread()) {
-                                    final Thread thread = new Thread(() -> {
-                                        log().info("Running Thread: {}", Thread.currentThread().getName());
-
-                                        // anything to say before run a potential heavy-load command?
-                                        if (!StringUtils.isBlank(command.beforeMessage())) {
-                                            signalCliRestApiClient.postSendMessage(command.beforeMessage(), BOT_RECIPIENT);
-                                        }
-
-                                        // run command
-                                        final String commandOutput = command.run(newMessage, this.filterMessages());
-                                        if (!StringUtils.isBlank(commandOutput)) {
-                                            signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, BOT_RECIPIENT);
-                                        }
-
-                                        // anything to say after this command?
-                                        if (!StringUtils.isBlank(command.afterMessage())) {
-                                            signalCliRestApiClient.postSendMessage(command.afterMessage(), BOT_RECIPIENT);
-                                        }
-                                    });
-
-                                    long sameCommandThreadCount = threads.stream().filter(t -> t.getName().equals(command.command())).count();
-                                    thread.setName(command.command() + "-" + sameCommandThreadCount);
-                                    threads.add(thread);
-                                    thread.start();
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-            threads.removeIf(thread -> !thread.isAlive());
+            TimerUtils.sleepSilent(1000);
+            this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
+            this.threads.removeIf(thread -> !thread.isAlive());
             cleanUpLogs();
             final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
             final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
-
             log().info("Messages: {}    TotalMem: {}    FreeMem: {}     UsedMem: {}",
                     messages.size(),
                     totalMem,
@@ -202,9 +196,9 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
     /**
      * Filter messages based on registered commands to avoid sending them to other APIs
      *
-     * @return filtered list of {@link de.codefever.conviva.model.signal.Message} that currently stored for this instance
+     * @return filtered list of {@link Message} that currently stored for this instance
      */
-    private synchronized List<de.codefever.conviva.model.signal.Message> filterMessages() {
+    private synchronized List<Message> filterMessages() {
 
         final List<String> messagePartsToIgnore = new ArrayList<>();
         commands.forEach(command -> {

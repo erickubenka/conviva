@@ -112,4 +112,12 @@ public class Message {
     public boolean isFromGroup() {
         return this.groupInfo != null;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "timestampDateTime=" + timestampDateTime +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }
