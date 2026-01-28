@@ -1,5 +1,5 @@
 ext {
-    testerraVersion = '2.11'
+    testerraVersion = '2.12'
 }
 
 apply plugin: 'java-library'
@@ -30,6 +30,7 @@ dependencies {
 
     implementation 'org.json:json:20240303'
     implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+//    implementation 'org.apache.httpcomponents.client5:httpclient5:5.6'
 }
 
 repositories {

@@ -1,9 +1,9 @@
 package de.codefever.conviva.api.whatsapp.command;
 
 
+import de.codefever.conviva.api.general.prompt.SingleMessageSummaryPrompt;
+import de.codefever.conviva.api.general.prompt.SummaryPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.api.whatsapp.prompt.SingleMessageSummaryPrompt;
-import de.codefever.conviva.api.whatsapp.prompt.SummaryPrompt;
 import de.codefever.conviva.model.openai.Prompt;
 import de.codefever.conviva.model.whatsapp.Message;
 

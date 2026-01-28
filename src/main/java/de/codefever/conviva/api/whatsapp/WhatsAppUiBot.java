@@ -168,7 +168,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         this.webDriverUUID = WEB_DRIVER_MANAGER.makeExclusive(WEB_DRIVER_MANAGER.getWebDriver());
 
         // Create new Thread here to track state of current bot
-        if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.screenshot.enabled", false)) {
+        if (PROPERTY_MANAGER.getBooleanProperty("conviva.bot.whatsapp.screenshot.enabled", false)) {
             this.getScreenShotThread().start();
         }
 
@@ -350,7 +350,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     private Thread getScreenShotThread() {
         final Thread screenShotThread = new Thread(() -> {
             log().info("Starting screenshot thread for bot {} in chat {}.", BOT_NAME, chatName);
-            int interval = Integer.parseInt(PROPERTY_MANAGER.getProperty("conviva.bot.screenshot.interval.ms", "10000"));
+            int interval = Integer.parseInt(PROPERTY_MANAGER.getProperty("conviva.bot.whatsapp.screenshot.interval.ms", "10000"));
 
             while (true) {
                 try {

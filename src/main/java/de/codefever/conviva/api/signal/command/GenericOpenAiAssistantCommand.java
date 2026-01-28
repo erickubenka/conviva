@@ -1,8 +1,8 @@
-package de.codefever.conviva.api.whatsapp.command;
+package de.codefever.conviva.api.signal.command;
 
 import de.codefever.conviva.api.general.prompt.GenericAssistantPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.signal.Message;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class GenericOpenAiAssistantCommand implements BotCommand {
         final String userPrompt = callToCommand.getMessage().replace(this.command(), "");
 
         // Determine if command was called on a single instance message or on a quoted message
-        final GenericAssistantPrompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new GenericAssistantPrompt(userPrompt, callToCommand.getQuotedMessage()) : new GenericAssistantPrompt(userPrompt);
+        final GenericAssistantPrompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new GenericAssistantPrompt(userPrompt, callToCommand.getQuote().getMessage()) : new GenericAssistantPrompt(userPrompt);
 
         log().info("Prompt: {}", prompt.userPrompt());
         final String response = new ResponsesApiClient().postResponseRequest(prompt);

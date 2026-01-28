@@ -183,21 +183,23 @@ public class DesktopWebDriverFactory implements
                 Position maximizePosition = desktopWebDriverRequest.getMaximizePosition();
                 if (maximizePosition != Position.CENTER) {
                     log().debug(String.format("Setting maximized window position to: %s", maximizePosition));
-                    Point targetPosition = new Point(0, 0);
+                    int targetX = 0;
+                    int targetY = 0;
                     switch (maximizePosition) {
                         case LEFT:
-                            targetPosition.x = -originWindowSize.width;
+                            targetX = -originWindowSize.width;
                             break;
                         case RIGHT:
-                            targetPosition.x = window.getSize().width + 1;
+                            targetX = window.getSize().width + 1;
                             break;
                         case TOP:
-                            targetPosition.y = -originWindowSize.height;
+                            targetY = -originWindowSize.height;
                             break;
                         case BOTTOM:
-                            targetPosition.y = window.getSize().height + 1;
+                            targetY = window.getSize().height + 1;
                             break;
                     }
+                    Point targetPosition = new Point(targetX, targetY);
                     log().debug(String.format("Move window to: %s", targetPosition));
                     window.setPosition(targetPosition);
                     // Re-maximize
@@ -275,7 +277,7 @@ public class DesktopWebDriverFactory implements
     }
 
     /**
-     * Remote when remoteAdress != null, local need browser to be set.
+     * Remote when remoteAddress != null, local need browser to be set.
      */
     private WebDriver startNewWebDriverSession(DesktopWebDriverRequest request, SessionContext sessionContext) {
 
@@ -335,7 +337,7 @@ public class DesktopWebDriverFactory implements
                 ((RemoteWebDriver) webDriver).setFileDetector(new LocalFileDetector());
                 sessionContext.setNodeUrl(seleniumUrl);
             } else {
-                log().warn("Local WebDriver setups may cause side effects. It's highly recommended to use a remote Selenium configurations for all environments!");
+                log().info("Local WebDriver is used.");
 
                 // Starting local webdriver needs caps as browser options
                 if (optionClass == request.getCapabilities().getClass()) {

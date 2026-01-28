@@ -1,16 +1,30 @@
 version: "3.8"
 
 services:
+  signal-api:
+    image: bbernhard/signal-cli-rest-api
+    container_name: signal-api
+    restart: always
+    ports:
+        - "9999:8080"
+    volumes:
+      - /home/erku/.conviva/signal-api:/home/.local/share/signal-cli
+    environment:
+      - MODE=native
+    logging:
+      driver: loki
+      options:
+        loki-url: "http://10.5.0.2:3100/loki/api/v1/push"
   conviva-bot:
     image: ghcr.io/erickubenka/conviva:main
     container_name: conviva-bot
     restart: always
     tty: true
     stdin_open: true
-    deploy:
-      resources:
-        limits:
-          memory: 4096M
+#    deploy:
+#      resources:
+#        limits:
+#          memory: 4096M
     volumes:
       - /home/erku/.conviva/userdata:/root/.conviva/userdata
       - /home/erku/.conviva/conviva.properties:/app/conviva.properties
@@ -21,3 +35,5 @@ services:
       driver: loki
       options:
         loki-url: "http://10.5.0.2:3100/loki/api/v1/push"
+    depends_on:
+      - signal-api
