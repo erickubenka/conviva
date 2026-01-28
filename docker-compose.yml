@@ -15,8 +15,8 @@ services:
       - /home/erku/.conviva/userdata:/root/.conviva/userdata
       - /home/erku/.conviva/conviva.properties:/app/conviva.properties
       - /home/erku/.conviva/tmp/img:/tmp/img
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro
     logging:
       driver: loki
       options:
