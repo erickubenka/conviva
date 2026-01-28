@@ -3,16 +3,14 @@ package de.codefever.conviva.api.openai;
 import de.codefever.conviva.model.openai.Prompt;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -69,31 +67,22 @@ public class ResponsesApiClient implements Loggable, PropertyManagerProvider {
         jsonBody.put("instructions", prompt.systemPrompt());
         jsonBody.put("input", prompt.userPrompt());
 
-        final DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(API_URL);
-        httpPost.setHeader("Authorization", "Bearer " + API_KEY);
-        httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
-        httpPost.setHeader("Accept", "application/json");
-
-        StringEntity stringEntity = new StringEntity(jsonBody.toString(), StandardCharsets.UTF_8);
-        stringEntity.setContentEncoding("UTF-8");
-        stringEntity.setContentType("application/json");
-        httpPost.setEntity(stringEntity);
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL))
+                .header("Authorization", "Bearer " + API_KEY)
+                .header("Content-Type", "application/json; charset=utf-8")
+                .header("Accept", "application/json")
+                .header("Content-Encoding", "UTF-8")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString(), StandardCharsets.UTF_8))
+                .build();
 
         try {
-            HttpResponse httpResponse = httpClient.execute(httpPost);
-            log().info("Response Code: " + httpResponse.getStatusLine().getStatusCode());
+            final HttpResponse<String> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log().info("Response Code: " + httpResponse.statusCode());
+            log().info("OpenAI Response: " + httpResponse.body());
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            log().info("OpenAI Response: " + response);
-            JSONObject jsonResponse = new JSONObject(response.toString());
+            final JSONObject jsonResponse = new JSONObject(httpResponse.body());
             if (jsonResponse.has("output")) {
                 // search for the object in output response array that have type "message"
                 for (int i = 0; i < jsonResponse.getJSONArray("output").length(); i++) {
@@ -105,13 +94,12 @@ public class ResponsesApiClient implements Loggable, PropertyManagerProvider {
                     }
                 }
                 log().error("The OpenAI response did not contain a output object of type message.");
-                return null;
             } else {
                 log().error("OpenAI Response did not contain output object.");
-                return null;
             }
+            return null;
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

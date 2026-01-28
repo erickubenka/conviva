@@ -31,6 +31,5 @@ public class SignalBotTest extends AbstractTest {
 
         final SignalCliRestApiClient signalCliRestApiClient = new SignalCliRestApiClient();
         signalCliRestApiClient.postSendMessage("Test from Automated Test", "+4915142324728");
-
     }
 }
