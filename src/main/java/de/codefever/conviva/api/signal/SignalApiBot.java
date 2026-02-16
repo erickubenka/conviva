@@ -130,6 +130,11 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
         EventBus.getInstance().subscribe(msg -> {
 
             try {
+                // filter all non-group-messages, because the bot is only intended for group chats for now.
+                if(!msg.isFromGroup()) {
+                    return;
+                }
+
                 // filter everything that is not from the configured group.
                 if (msg.isFromGroup() && !msg.getGroupInfo().getGroupId().equals(group.getInternalId())) {
                     return;
