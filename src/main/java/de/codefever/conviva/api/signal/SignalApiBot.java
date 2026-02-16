@@ -175,8 +175,8 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
                                 threads.add(thread);
                                 thread.start();
                             }
+                            break;
                         }
-                        break;
                     }
                 }
             } catch (Exception e) {
