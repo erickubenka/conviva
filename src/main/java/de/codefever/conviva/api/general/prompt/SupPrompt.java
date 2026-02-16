@@ -1,9 +1,7 @@
 package de.codefever.conviva.api.general.prompt;
 
 import de.codefever.conviva.model.openai.Prompt;
-import de.codefever.conviva.model.whatsapp.Message;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -11,12 +9,12 @@ import java.util.List;
  */
 public class SupPrompt implements Prompt {
 
-    private final List<Message> messages;
+    private final List<String> messages;
 
     private static final String SYSTEM_PROMPT = "Du bist ein Assistent, welcher mir den Inhalt von Chatverläufen themenbasierend zusammenfasst und gruppiert.";
-    private static final String USER_PROMPT = "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im WhatsApp Format in chronologischer Reihenfolge mit Timestamp des Beginns des Themas aus: \"ab dd.MM.yyyy hh:mm Uhr\".";
+    private static final String USER_PROMPT = "Fasse den Chatverlauf thematisch zusammen und gib mir die Themen als Bulletpoint Liste im Signal Format in chronologischer Reihenfolge mit Timestamp des Beginns des Themas aus: \"ab dd.MM.yyyy hh:mm Uhr\".";
 
-    public SupPrompt(final List<Message> messages) {
+    public SupPrompt(final List<String> messages) {
         this.messages = messages;
     }
 
@@ -34,8 +32,8 @@ public class SupPrompt implements Prompt {
     public String userPrompt() {
 
         final StringBuilder prompt = new StringBuilder(USER_PROMPT);
-        for (Message message : messages) {
-            prompt.append(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage())).append("\n");
+        for (String message : messages) {
+            prompt.append(message).append("\n");
         }
 
         return prompt.toString();

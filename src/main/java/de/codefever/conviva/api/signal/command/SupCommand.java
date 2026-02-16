@@ -1,8 +1,8 @@
-package de.codefever.conviva.api.whatsapp.command;
+package de.codefever.conviva.api.signal.command;
 
 import de.codefever.conviva.api.general.prompt.SupPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.signal.Message;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

@@ -1,9 +1,7 @@
 package de.codefever.conviva.api.general.prompt;
 
 import de.codefever.conviva.model.openai.Prompt;
-import de.codefever.conviva.model.whatsapp.Message;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -11,12 +9,12 @@ import java.util.List;
  */
 public class SummaryPrompt implements Prompt {
 
-    private final List<Message> messages;
+    private final List<String> messages;
 
     private static final String SYSTEM_PROMPT = "Du bist ein Assistent, welcher mir den Inhalt von Chatverläufen themenbasierend zusammenfasst und gruppiert.";
     private static final String USER_PROMPT = "Fasse den Chatverlauf zusammen. Gruppiere die Nachrichten nach Themen. Pro Thema MAXIMAL 3 Stichpunkte. Zeitstempel der ersten Nachricht des Thems angeben \"ab dd.MM.yyyy hh:mm Uhr\".";
 
-    public SummaryPrompt(List<Message> messages) {
+    public SummaryPrompt(List<String> messages) {
         this.messages = messages;
     }
 
@@ -34,8 +32,8 @@ public class SummaryPrompt implements Prompt {
     public String userPrompt() {
 
         final StringBuilder prompt = new StringBuilder(USER_PROMPT);
-        for (Message message : messages) {
-            prompt.append(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage())).append("\n");
+        for (final String message : messages) {
+            prompt.append(message).append("\n");
         }
 
         return prompt.toString();

@@ -7,6 +7,8 @@ import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.model.openai.Prompt;
 import de.codefever.conviva.model.whatsapp.Message;
 
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,7 +34,12 @@ public class TldrCommand implements BotCommand {
     @Override
     public String run(final Message callToCommand, final List<Message> messages) {
 
-        final Prompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new SingleMessageSummaryPrompt(callToCommand.getQuotedMessage()) : new SummaryPrompt(messages);
+        final List<String> preparedMessages = new ArrayList<>();
+        for (final Message message : messages) {
+            preparedMessages.add(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage()));
+        }
+
+        final Prompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new SingleMessageSummaryPrompt(callToCommand.getQuotedMessage()) : new SummaryPrompt(preparedMessages);
         log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: {}", summary);

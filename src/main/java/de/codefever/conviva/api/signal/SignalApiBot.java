@@ -2,6 +2,8 @@ package de.codefever.conviva.api.signal;
 
 import de.codefever.conviva.api.signal.command.BotCommand;
 import de.codefever.conviva.api.signal.command.GenericOpenAiAssistantCommand;
+import de.codefever.conviva.api.signal.command.HelpCommand;
+import de.codefever.conviva.api.signal.command.SupCommand;
 import de.codefever.conviva.model.signal.Group;
 import de.codefever.conviva.model.signal.Message;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
@@ -88,6 +90,8 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
     public SignalApiBot() {
 
         this.registerCommand(new GenericOpenAiAssistantCommand(BOT_NAME_SHORTHAND));
+        this.registerCommand(new SupCommand());
+        this.registerCommand(new HelpCommand(this.commands));
 
         try {
             this.executionContext = Testerra.getInjector().getInstance(IExecutionContextController.class).getExecutionContext();
@@ -103,7 +107,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
      *
      * @param botCommand {@link BotCommand} to register.
      */
-    public void registerCommand(final BotCommand botCommand) {
+    private void registerCommand(final BotCommand botCommand) {
         log().info("Successfully registered command: {}", botCommand.command());
         this.commands.add(botCommand);
     }
