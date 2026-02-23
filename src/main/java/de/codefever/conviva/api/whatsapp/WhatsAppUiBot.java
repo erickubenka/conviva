@@ -1,17 +1,18 @@
 package de.codefever.conviva.api.whatsapp;
 
-import de.codefever.conviva.api.whatsapp.command.BotCommand;
-import de.codefever.conviva.api.whatsapp.command.BugCommand;
-import de.codefever.conviva.api.whatsapp.command.GenericOpenAiAssistantCommand;
-import de.codefever.conviva.api.whatsapp.command.HelpCommand;
+import de.codefever.conviva.api.general.command.BotCommand;
+import de.codefever.conviva.api.general.command.BugCommand;
+import de.codefever.conviva.api.general.command.GenericOpenAiAssistantCommand;
+import de.codefever.conviva.api.general.command.HelpCommand;
+import de.codefever.conviva.api.general.command.StatusCommand;
+import de.codefever.conviva.api.general.command.SupCommand;
+import de.codefever.conviva.api.general.command.TldrCommand;
+import de.codefever.conviva.api.general.command.TopPostCommand;
 import de.codefever.conviva.api.whatsapp.command.RestartCommand;
-import de.codefever.conviva.api.whatsapp.command.StatusCommand;
 import de.codefever.conviva.api.whatsapp.command.StopCommand;
-import de.codefever.conviva.api.whatsapp.command.SupCommand;
-import de.codefever.conviva.api.whatsapp.command.TldrCommand;
-import de.codefever.conviva.api.whatsapp.command.TopPostCommand;
 import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.general.Message;
+import de.codefever.conviva.model.whatsapp.WhatsappMessage;
 import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
 import de.codefever.conviva.page.whatsapp.ModalOverlayPage;
@@ -99,7 +100,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     /**
      * List of messages the bot has read.
      */
-    private final List<Message> messages = Collections.synchronizedList(new ArrayList<>());
+    private final List<WhatsappMessage> messages = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * List of threads the bot has started.
@@ -178,7 +179,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         // init messages and get rid of old stuff.
         this.messages.addAll(chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES));
         this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-        this.messages.sort(Comparator.comparing(Message::getDateTime));
+        this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
 
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
@@ -188,8 +189,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         log().info("Initialized. Current messages for today: {}", messages.size());
         boolean stop = false;
         while (!stop) {
-            this.messages.sort(Comparator.comparing(Message::getDateTime));
-            final List<Message> potentiallyNewMessages = new ArrayList<>();
+            this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
+            final List<WhatsappMessage> potentiallyNewMessages = new ArrayList<>();
 
             try {
                 // break loop detection, so we have to go for a double class init to break buffer
@@ -200,7 +201,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 // find last message and check if already in message list
                 // if we already know this message, just continue
                 // if not, get last 5 messages to ensure we got everything that is possibly new.
-                final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
+                final WhatsappMessage message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
                 if (message != null && !this.messages.contains(message)) {
                     potentiallyNewMessages.addAll(chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES));
                 }
@@ -216,10 +217,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             }
 
             // if we have potentially new messages, check them
-            this.messages.sort(Comparator.comparing(Message::getDateTime));
+            this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
             potentiallyNewMessages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             if (!potentiallyNewMessages.isEmpty()) {
-                for (final Message newMessage : potentiallyNewMessages) {
+                for (final WhatsappMessage newMessage : potentiallyNewMessages) {
                     if (!messages.contains(newMessage)) {
                         messages.add(newMessage);
                         log().info("Added message to list: {}", newMessage.getMessage());
@@ -241,7 +242,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             // For long quoted messages we search them in our own history to run commands with them
                                             // if the message is not in our own history, we just use the snippet we have
                                             if (newMessage.hasQuotedMessage()) {
-                                                final Message quotedMessageInHistory = messages.stream().filter(message -> message.getMessage().contains(newMessage.getQuotedMessage())).findFirst().orElse(null);
+                                                final WhatsappMessage quotedMessageInHistory = messages.stream().filter(message -> message.getMessage().contains(newMessage.getQuotedMessage())).findFirst().orElse(null);
                                                 if (quotedMessageInHistory != null) {
                                                     newMessage.setQuotedMessage(quotedMessageInHistory.getMessage());
                                                 }
@@ -369,7 +370,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
      * Send a message to the chat.
      * Must be synchronized because sendMessage input can only be used once at a time.
      *
-     * @param message {@link Message} to send.
+     * @param message {@link WhatsappMessage} to send.
      * @return Refreshed {@link ChatPage} instance of the chat the bot joined.
      */
     private synchronized ChatPage sendMessage(final String message) {
@@ -387,7 +388,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     /**
      * Filter messages based on registered commands to avoid sending them to other APIs
      *
-     * @return filtered list of {@link Message} that currently stored for this instance
+     * @return filtered list of {@link WhatsappMessage} that currently stored for this instance
      */
     private synchronized List<Message> filterMessages() {
 

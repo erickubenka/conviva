@@ -1,5 +1,7 @@
 package de.codefever.conviva.model.signal;
 
+import de.codefever.conviva.model.general.Message;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
@@ -42,7 +44,7 @@ import static eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider.P
  *     "account": "+491628293597"
  *   }
  */
-public class Message {
+public class SignalMessage implements Message {
 
     private String sourceName;
     private Long timestamp;
@@ -95,6 +97,10 @@ public class Message {
 
     public QuotedMessage getQuote() {
         return quote;
+    }
+
+    public String getQuotedMessage() {
+        return this.quote != null ? this.quote.getMessage() : null;
     }
 
     public void setQuote(QuotedMessage quote) {

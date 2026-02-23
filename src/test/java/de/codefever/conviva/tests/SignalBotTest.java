@@ -5,7 +5,7 @@ import de.codefever.conviva.api.signal.EventBus;
 import de.codefever.conviva.api.signal.SignalCliRestApiClient;
 import de.codefever.conviva.api.signal.SignalWebSocketClient;
 import de.codefever.conviva.model.signal.Configuration;
-import de.codefever.conviva.model.signal.Message;
+import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 import org.testng.annotations.Test;
 
@@ -25,7 +25,7 @@ public class SignalBotTest extends AbstractTest {
     public void testT01_GetLatestMessages() {
 
         final SignalCliRestApiClient signalCliRestApiClient = new SignalCliRestApiClient();
-        final List<Message> messages = signalCliRestApiClient.getLatestMessages();
+        final List<SignalMessage> messages = signalCliRestApiClient.getLatestMessages();
         ASSERT.assertNotNull(messages);
     }
 

@@ -1,6 +1,6 @@
 package de.codefever.conviva.page.whatsapp;
 
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.whatsapp.WhatsappMessage;
 import eu.tsystems.mms.tic.testframework.exceptions.UiElementAssertionError;
 import eu.tsystems.mms.tic.testframework.pageobjects.Check;
 import eu.tsystems.mms.tic.testframework.pageobjects.UiElement;
@@ -72,12 +72,12 @@ public class ChatPage extends HomePage {
      * Returns the last visible messages
      *
      * @param count {@link Integer}
-     * @return {@link List} of {@link Message}
+     * @return {@link List} of {@link WhatsappMessage}
      */
-    public List<Message> visibleMessages(final int count, final boolean includeOwnMessages) {
+    public List<WhatsappMessage> visibleMessages(final int count, final boolean includeOwnMessages) {
 
         final UiElement divMessageIn = find(By.cssSelector("div.message-in div.copyable-text"));
-        final List<Message> messages = new ArrayList<>(this.readMessagesFromList(divMessageIn, count));
+        final List<WhatsappMessage> messages = new ArrayList<>(this.readMessagesFromList(divMessageIn, count));
 
         if (includeOwnMessages) {
             UiElement divMessageOut = find(By.cssSelector("div.message-out div.copyable-text"));
@@ -90,9 +90,9 @@ public class ChatPage extends HomePage {
     /**
      * Returns all visible messages
      *
-     * @return {@link List} of {@link Message}
+     * @return {@link List} of {@link WhatsappMessage}
      */
-    public List<Message> visibleMessages(final boolean includeOwnMessages) {
+    public List<WhatsappMessage> visibleMessages(final boolean includeOwnMessages) {
         return this.visibleMessages(-1, includeOwnMessages);
     }
 
@@ -101,13 +101,13 @@ public class ChatPage extends HomePage {
      *
      * @param dateTime     {@link LocalDateTime}
      * @param startTimeout {@link Integer}
-     * @return {@link List} of {@link Message}
+     * @return {@link List} of {@link WhatsappMessage}
      */
-    public List<Message> allMessagesAfter(final LocalDateTime dateTime, final int startTimeout, final boolean includeOwnMessages) {
+    public List<WhatsappMessage> allMessagesAfter(final LocalDateTime dateTime, final int startTimeout, final boolean includeOwnMessages) {
 
         final LocalDateTime startTime = LocalDateTime.now();
         while (LocalDateTime.now().isBefore(startTime.plusMinutes(startTimeout))) {
-            final Message message = firstMessageOfList();
+            final WhatsappMessage message = firstMessageOfList();
             if (message != null) {
                 if (message.getDateTime().isBefore(dateTime)) {
                     break;
@@ -118,8 +118,8 @@ public class ChatPage extends HomePage {
             TimerUtils.sleep(500);
         }
 
-        final List<Message> visibleMessages = this.visibleMessages(includeOwnMessages);
-        visibleMessages.sort(Comparator.comparing(Message::getDateTime));
+        final List<WhatsappMessage> visibleMessages = this.visibleMessages(includeOwnMessages);
+        visibleMessages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
         log().info("Found {} messages in {} seconds.", visibleMessages.size(), ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
         return visibleMessages;
     }
@@ -133,14 +133,14 @@ public class ChatPage extends HomePage {
     }
 
     /**
-     * Determines if given message div is displayed at least once, then run over the list to parse the given subelements into a valid {@link Message} object
+     * Determines if given message div is displayed at least once, then run over the list to parse the given subelements into a valid {@link WhatsappMessage} object
      *
      * @param messageDiv {@link UiElement}
-     * @return {@link List} of {@link Message}
+     * @return {@link List} of {@link WhatsappMessage}
      */
-    private List<Message> readMessagesFromList(final UiElement messageDiv, int count) {
+    private List<WhatsappMessage> readMessagesFromList(final UiElement messageDiv, int count) {
 
-        final List<Message> messages = new ArrayList<>();
+        final List<WhatsappMessage> messages = new ArrayList<>();
         if (messageDiv.expect().displayed().getActual()) {
 
             final UiElementList<UiElement> messageDivList = messageDiv.list();
@@ -154,7 +154,7 @@ public class ChatPage extends HomePage {
             for (int i = messageDivListSize - count; i < messageDivListSize; i++) {
                 log().info("Parsing message {}/{}.", i, count);
                 final UiElement messageElement = messageDivList.get(i);
-                final Message message = this.parseMessageFromUi(messageElement);
+                final WhatsappMessage message = this.parseMessageFromUi(messageElement);
                 if (message != null) {
                     messages.add(message);
                 }
@@ -167,11 +167,11 @@ public class ChatPage extends HomePage {
     /**
      * Returns the first message of the list
      *
-     * @return {@link Message}
+     * @return {@link WhatsappMessage}
      */
-    public Message firstMessageOfList() {
+    public WhatsappMessage firstMessageOfList() {
         final UiElement messageElement = find(By.cssSelector("div.message-in div.copyable-text"));
-        final Message message = this.parseMessageFromUi(messageElement);
+        final WhatsappMessage message = this.parseMessageFromUi(messageElement);
 
         if (message != null) {
             return message;
@@ -185,12 +185,12 @@ public class ChatPage extends HomePage {
      * Returns the last message of the list
      *
      * @param includeOwnMessages {@link Boolean}
-     * @return {@link Message}
+     * @return {@link WhatsappMessage}
      */
-    public Message lastMessageOfList(final boolean includeOwnMessages) {
-        final List<Message> foundMessages = this.visibleMessages(1, includeOwnMessages);
+    public WhatsappMessage lastMessageOfList(final boolean includeOwnMessages) {
+        final List<WhatsappMessage> foundMessages = this.visibleMessages(1, includeOwnMessages);
         if (!foundMessages.isEmpty()) {
-            foundMessages.sort(Comparator.comparing(Message::getDateTime).reversed());
+            foundMessages.sort(Comparator.comparing(WhatsappMessage::getDateTime).reversed());
             return foundMessages.get(0);
         }
 
@@ -198,12 +198,12 @@ public class ChatPage extends HomePage {
     }
 
     /**
-     * Parses a message from a given {@link UiElement} into a {@link Message} object
+     * Parses a message from a given {@link UiElement} into a {@link WhatsappMessage} object
      *
      * @param messageElement {@link UiElement}
-     * @return {@link Message}
+     * @return {@link WhatsappMessage}
      */
-    private Message parseMessageFromUi(final UiElement messageElement) {
+    private WhatsappMessage parseMessageFromUi(final UiElement messageElement) {
         final UiElement copyableSpanElement = messageElement.find(By.cssSelector("span.copyable-text"));
 
         try {
@@ -231,7 +231,7 @@ public class ChatPage extends HomePage {
                 // found a message, go deeper...
                 if (StringUtils.isNotBlank(dateAndAuthor) && StringUtils.isNotBlank(textOfMessage)) {
                     try {
-                        final Message message = new Message(dateAndAuthor, textOfMessage);
+                        final WhatsappMessage message = new WhatsappMessage(dateAndAuthor, textOfMessage);
 
                         // quoted message detection - for !ggl or !tldr of a specific post. GitHub Issue #14
                         if (messageElement.find(By.cssSelector("span.quoted-mention")).expect().displayed().getActual()) {

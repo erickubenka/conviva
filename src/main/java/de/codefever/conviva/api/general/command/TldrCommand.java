@@ -1,55 +1,54 @@
-package de.codefever.conviva.api.whatsapp.command;
+package de.codefever.conviva.api.general.command;
 
-import de.codefever.conviva.api.general.prompt.SupPrompt;
+
+import de.codefever.conviva.api.general.prompt.SingleMessageSummaryPrompt;
+import de.codefever.conviva.api.general.prompt.SummaryPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.general.Message;
+import de.codefever.conviva.model.openai.Prompt;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Command to summarize a chat history to a short summary.
+ * Command to summarize the chat history.
  */
-public class SupCommand implements BotCommand {
+public class TldrCommand implements BotCommand {
 
     @Override
     public String command() {
-        return "!sup";
+        return "!tldr";
     }
 
     @Override
     public String description() {
-        return "Richtig kurze Zusammenfassung.";
+        return "Fasst den Chatverlauf oder die zitierte Nachricht zusammen.";
     }
 
     @Override
     public String outputIdentifier() {
-        return "###SUP###";
+        return "###SUMMARY###";
     }
 
     @Override
     public String run(final Message callToCommand, final List<Message> messages) {
-
-        if (this.isIntendedForQuotedMessage(callToCommand)) {
-            return "";
-        }
 
         final List<String> preparedMessages = new ArrayList<>();
         for (final Message message : messages) {
             preparedMessages.add(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage()));
         }
 
-        final SupPrompt prompt = new SupPrompt(preparedMessages);
+        final Prompt prompt = this.isIntendedForQuotedMessage(callToCommand) ? new SingleMessageSummaryPrompt(callToCommand.getQuotedMessage()) : new SummaryPrompt(preparedMessages);
         log().info("Prompt: {}", prompt.userPrompt());
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
-        log().info("SUP: {}", summary);
+        log().info("Summary: {}", summary);
         return summary;
     }
 
     @Override
     public String beforeMessage() {
-        return "###SUP IN PROCESS###";
+        return "###SUMMARY IN PROCESS###";
     }
 
     @Override

@@ -1,8 +1,8 @@
 package de.codefever.conviva.api.signal;
 
 import de.codefever.conviva.model.signal.GroupInfo;
-import de.codefever.conviva.model.signal.Message;
 import de.codefever.conviva.model.signal.QuotedMessage;
+import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import org.json.JSONObject;
 
@@ -27,7 +27,7 @@ public class SignalWebSocketListener implements Loggable, WebSocket.Listener {
 
             if (messageObject.has("envelope")) {
                 final JSONObject envelopeObject = messageObject.getJSONObject("envelope");
-                final Message message = new Message();
+                final SignalMessage message = new SignalMessage();
                 // extract message
                 if (envelopeObject.has("dataMessage")) {
                     final JSONObject dataMessageObject = envelopeObject.getJSONObject("dataMessage");

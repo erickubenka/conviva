@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * Represents a message in a WhatsApp chat.
  */
-public class Message implements PropertyManagerProvider {
+public class WhatsappMessage implements de.codefever.conviva.model.general.Message, PropertyManagerProvider {
 
     private static final ZoneId MESSAGE_TIME_ZONE_ID = ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.messages"));
     private static final ZoneId TARGET_TIME_ZONE_ID = ZoneId.of(PROPERTY_MANAGER.getProperty("conviva.bot.timezone.target"));
@@ -47,7 +47,7 @@ public class Message implements PropertyManagerProvider {
      * @param metaData the metadata of the message
      * @param message  the message content
      */
-    public Message(final String metaData, final String message) {
+    public WhatsappMessage(final String metaData, final String message) {
         this.metaData = metaData;
         this.message = message;
         parseMetaData();
@@ -106,7 +106,7 @@ public class Message implements PropertyManagerProvider {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Message && ((Message) obj).dateTime.equals(this.dateTime) && ((Message) obj).message.equals(message);
+        return obj instanceof WhatsappMessage && ((WhatsappMessage) obj).dateTime.equals(this.dateTime) && ((WhatsappMessage) obj).message.equals(message);
     }
 
     @Override

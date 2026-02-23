@@ -4,8 +4,8 @@ import de.codefever.conviva.model.signal.Configuration;
 import de.codefever.conviva.model.signal.Group;
 import de.codefever.conviva.model.signal.GroupInfo;
 import de.codefever.conviva.model.signal.Logging;
-import de.codefever.conviva.model.signal.Message;
 import de.codefever.conviva.model.signal.QuotedMessage;
+import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;
 import org.json.JSONArray;
@@ -106,13 +106,13 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
      * Read latest messages from account using:
      * http://<API_URL>/v1/receive/<PHONE_NUMBER>
      *
-     * @return {@link List} of {@link Message}
+     * @return {@link List} of {@link SignalMessage}
      * @deprecated since we use Signal CLI Rest API in WebSocket mode now. Use {@link SignalWebSocketClient} instead.
      */
     @Deprecated(since = "2026-01-18")
-    public List<Message> getLatestMessages() {
+    public List<SignalMessage> getLatestMessages() {
 
-        final List<Message> messages = new ArrayList<>();
+        final List<SignalMessage> messages = new ArrayList<>();
 
         final HttpClient client = HttpClient.newHttpClient();
         final HttpRequest request = HttpRequest.newBuilder()
@@ -131,7 +131,7 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
 
                 if (messageObject.has("envelope")) {
                     final JSONObject envelopeObject = messageObject.getJSONObject("envelope");
-                    final Message message = new Message();
+                    final SignalMessage message = new SignalMessage();
                     // extract message
                     if (envelopeObject.has("dataMessage")) {
                         final JSONObject dataMessageObject = envelopeObject.getJSONObject("dataMessage");

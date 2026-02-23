@@ -1,6 +1,6 @@
-package de.codefever.conviva.api.whatsapp.command;
+package de.codefever.conviva.api.general.command;
 
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.general.Message;
 
 import java.util.List;
 

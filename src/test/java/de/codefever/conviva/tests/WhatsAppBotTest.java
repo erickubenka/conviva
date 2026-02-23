@@ -7,7 +7,7 @@ import de.codefever.conviva.api.openai.CompletionsApiClient;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;
 import de.codefever.conviva.model.openai.Prompt;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.whatsapp.WhatsappMessage;
 import de.codefever.conviva.page.whatsapp.ChatPage;
 import de.codefever.conviva.page.whatsapp.ConnectWithNumberPage;
 import de.codefever.conviva.page.whatsapp.HomePage;
@@ -50,7 +50,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
 
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
         UITestUtils.takeScreenshot(homePage.getWebDriver(), true);
-        List<Message> messages = chatPage.visibleMessages(5, false);
+        List<WhatsappMessage> messages = chatPage.visibleMessages(5, false);
 
         ASSERT.assertNotEquals(messages.size(), 0);
     }
@@ -62,7 +62,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         HomePage homePage = page.waitForQrCodeScanned();
 
         ChatPage chatPage = homePage.openChat("Eric Kubenka");
-        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(2), 2, true);
+        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(2), 2, true);
         ASSERT.assertNotEquals(messages.size(), 0);
     }
 
@@ -95,30 +95,30 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
     @Test
     public void testT03_RunSummaryForTestData() {
         // random messages for testing
-        List<Message> messages = new ArrayList<>();
-        messages.add(new Message("[07:49, 4/19/2024] User:", "Unglaublich, dass Dortmund gegen Bayern gewinnen wird!"));
-        messages.add(new Message("[07:50, 4/19/2024] OtherUser:", "Ja, das war wirklich eine Überaschung."));
-        messages.add(new Message("[07:54, 4/19/2024] OtherUser:", "Vor allem, dass es dann ausgerechnet Hummels ist."));
-        messages.add(new Message("[07:54, 4/19/2024] OtherUser:", "Abseits?"));
-        messages.add(new Message("[07:54, 4/19/2024] User:", "Sah für mich auch danach aus."));
-        messages.add(new Message("[08:13, 4/19/2024] User:", "Das ist doch kein Elfmeter"));
-        messages.add(new Message("[08:14, 4/19/2024] OtherUser:", "Und zack, sind die Bayern wieder im Spiel."));
+        List<WhatsappMessage> messages = new ArrayList<>();
+        messages.add(new WhatsappMessage("[07:49, 4/19/2024] User:", "Unglaublich, dass Dortmund gegen Bayern gewinnen wird!"));
+        messages.add(new WhatsappMessage("[07:50, 4/19/2024] OtherUser:", "Ja, das war wirklich eine Überaschung."));
+        messages.add(new WhatsappMessage("[07:54, 4/19/2024] OtherUser:", "Vor allem, dass es dann ausgerechnet Hummels ist."));
+        messages.add(new WhatsappMessage("[07:54, 4/19/2024] OtherUser:", "Abseits?"));
+        messages.add(new WhatsappMessage("[07:54, 4/19/2024] User:", "Sah für mich auch danach aus."));
+        messages.add(new WhatsappMessage("[08:13, 4/19/2024] User:", "Das ist doch kein Elfmeter"));
+        messages.add(new WhatsappMessage("[08:14, 4/19/2024] OtherUser:", "Und zack, sind die Bayern wieder im Spiel."));
 
-        messages.add(new Message("[12:15, 4/19/2024] User:", "Meien Aktien stehen heut überhaupt nicht gut dar"));
-        messages.add(new Message("[12:16, 4/19/2024] OtherUser:", "Ja, das ist wirklich schade. Was hast du denn im Portfolie, das dich so drückt?"));
-        messages.add(new Message("[12:17, 4/19/2024] User:", "Ich habe ein paar Aktien von VW und BMW"));
-        messages.add(new Message("[12:18, 4/19/2024] OtherUser:", "Das ist natürlich nicht so gut. Aber das wird schon wieder. Die Wirtschaft erholt sich ja langsam wieder."));
-        messages.add(new Message("[12:19, 4/19/2024] User:", "Ja, das hoffe ich auch."));
-        messages.add(new Message("[12:20, 4/19/2024] User:", "Da msus eben mein nVidia Kram alles richten"));
-        messages.add(new Message("[12:21, 4/19/2024] OtherUser:", "Ja, das ist eine gute Idee. Die sind ja auch immer sehr stabil."));
-        messages.add(new Message("[12:21, 4/19/2024] OtherUser:", "Ich bau eher auf ETF und da auch nur wenige."));
-        messages.add(new Message("[12:22, 4/19/2024] User:", "Ja, das ist auch eine gute Idee. Ich bin da eher der Zocker."));
+        messages.add(new WhatsappMessage("[12:15, 4/19/2024] User:", "Meien Aktien stehen heut überhaupt nicht gut dar"));
+        messages.add(new WhatsappMessage("[12:16, 4/19/2024] OtherUser:", "Ja, das ist wirklich schade. Was hast du denn im Portfolie, das dich so drückt?"));
+        messages.add(new WhatsappMessage("[12:17, 4/19/2024] User:", "Ich habe ein paar Aktien von VW und BMW"));
+        messages.add(new WhatsappMessage("[12:18, 4/19/2024] OtherUser:", "Das ist natürlich nicht so gut. Aber das wird schon wieder. Die Wirtschaft erholt sich ja langsam wieder."));
+        messages.add(new WhatsappMessage("[12:19, 4/19/2024] User:", "Ja, das hoffe ich auch."));
+        messages.add(new WhatsappMessage("[12:20, 4/19/2024] User:", "Da msus eben mein nVidia Kram alles richten"));
+        messages.add(new WhatsappMessage("[12:21, 4/19/2024] OtherUser:", "Ja, das ist eine gute Idee. Die sind ja auch immer sehr stabil."));
+        messages.add(new WhatsappMessage("[12:21, 4/19/2024] OtherUser:", "Ich bau eher auf ETF und da auch nur wenige."));
+        messages.add(new WhatsappMessage("[12:22, 4/19/2024] User:", "Ja, das ist auch eine gute Idee. Ich bin da eher der Zocker."));
 
-        messages.add(new Message("[17:51, 4/19/2024] User:", "Die neue Folge vom ZDF magazin ist auch sehenswert."));
-        messages.add(new Message("[17:52, 4/19/2024] OtherUser:", "Ja, das stimmt."));
-        messages.add(new Message("[17:53, 4/19/2024] OtherUser:", "Die Berichte sind immer sehr informativ."));
-        messages.add(new Message("[17:54, 4/19/2024] User:", "Ich finde die Moderation auch sehr gut."));
-        messages.add(new Message("[17:55, 4/19/2024] OtherUser:", "Und mit dem Thema bzgl. Gotha haben sie natürlich absolut recht."));
+        messages.add(new WhatsappMessage("[17:51, 4/19/2024] User:", "Die neue Folge vom ZDF magazin ist auch sehenswert."));
+        messages.add(new WhatsappMessage("[17:52, 4/19/2024] OtherUser:", "Ja, das stimmt."));
+        messages.add(new WhatsappMessage("[17:53, 4/19/2024] OtherUser:", "Die Berichte sind immer sehr informativ."));
+        messages.add(new WhatsappMessage("[17:54, 4/19/2024] User:", "Ich finde die Moderation auch sehr gut."));
+        messages.add(new WhatsappMessage("[17:55, 4/19/2024] OtherUser:", "Und mit dem Thema bzgl. Gotha haben sie natürlich absolut recht."));
 
 
         final SummaryPrompt prompt = new SummaryPrompt(messages);
@@ -131,7 +131,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         LoginPage page = PAGE_FACTORY.createPage(LoginPage.class);
         HomePage homePage = page.waitForQrCodeScanned();
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
-        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
+        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
         final SummaryPrompt prompt = new SummaryPrompt(messages);
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
@@ -143,7 +143,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         HomePage homePage = page.waitForQrCodeScanned();
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
 
-        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
+        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
         final SummaryPrompt prompt = new SummaryPrompt(messages);
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);

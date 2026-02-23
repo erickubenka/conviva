@@ -1,7 +1,8 @@
 package de.codefever.conviva.api.whatsapp.command;
 
+import de.codefever.conviva.api.general.command.BotCommand;
 import de.codefever.conviva.api.whatsapp.workflows.LoginWorkFlow;
-import de.codefever.conviva.model.whatsapp.Message;
+import de.codefever.conviva.model.general.Message;
 import eu.tsystems.mms.tic.testframework.testing.PageFactoryProvider;
 import eu.tsystems.mms.tic.testframework.testing.WebDriverManagerProvider;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;

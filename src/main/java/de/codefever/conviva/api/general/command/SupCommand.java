@@ -1,8 +1,8 @@
-package de.codefever.conviva.api.signal.command;
+package de.codefever.conviva.api.general.command;
 
 import de.codefever.conviva.api.general.prompt.SupPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
-import de.codefever.conviva.model.signal.Message;
+import de.codefever.conviva.model.general.Message;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

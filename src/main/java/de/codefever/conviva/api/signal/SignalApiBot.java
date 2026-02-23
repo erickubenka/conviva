@@ -1,11 +1,16 @@
 package de.codefever.conviva.api.signal;
 
-import de.codefever.conviva.api.signal.command.BotCommand;
-import de.codefever.conviva.api.signal.command.GenericOpenAiAssistantCommand;
-import de.codefever.conviva.api.signal.command.HelpCommand;
-import de.codefever.conviva.api.signal.command.SupCommand;
+import de.codefever.conviva.api.general.command.BotCommand;
+import de.codefever.conviva.api.general.command.BugCommand;
+import de.codefever.conviva.api.general.command.GenericOpenAiAssistantCommand;
+import de.codefever.conviva.api.general.command.HelpCommand;
+import de.codefever.conviva.api.general.command.StatusCommand;
+import de.codefever.conviva.api.general.command.SupCommand;
+import de.codefever.conviva.api.general.command.TldrCommand;
+import de.codefever.conviva.api.general.command.TopPostCommand;
+import de.codefever.conviva.model.general.Message;
 import de.codefever.conviva.model.signal.Group;
-import de.codefever.conviva.model.signal.Message;
+import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.common.Testerra;
 import eu.tsystems.mms.tic.testframework.internal.Timings;
@@ -85,12 +90,16 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
      * /**
      * List of messages the bot has read.
      */
-    private final List<Message> messages = Collections.synchronizedList(new ArrayList<>());
+    private final List<SignalMessage> messages = Collections.synchronizedList(new ArrayList<>());
 
     public SignalApiBot() {
 
+        this.registerCommand(new StatusCommand(this.startTime));
+        this.registerCommand(new BugCommand());
+        this.registerCommand(new TopPostCommand());
         this.registerCommand(new GenericOpenAiAssistantCommand(BOT_NAME_SHORTHAND));
         this.registerCommand(new SupCommand());
+        this.registerCommand(new TldrCommand());
         this.registerCommand(new HelpCommand(this.commands));
 
         try {
@@ -147,7 +156,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
 
                 this.messages.add(msg);
                 this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-                this.messages.sort(Comparator.comparing(Message::getDateTime));
+                this.messages.sort(Comparator.comparing(SignalMessage::getDateTime));
 
                 if (msg.getDateTime().isAfter(startTime)) {
                     for (final BotCommand command : this.commands) {
@@ -209,7 +218,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
     /**
      * Filter messages based on registered commands to avoid sending them to other APIs
      *
-     * @return filtered list of {@link Message} that currently stored for this instance
+     * @return filtered list of {@link SignalMessage} that currently stored for this instance
      */
     private synchronized List<Message> filterMessages() {
 
@@ -234,7 +243,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
         });
 
         synchronized (LOCK) {
-            return this.messages.stream().filter(Message::hasMessage).filter(message -> {
+            return this.messages.stream().filter(SignalMessage::hasMessage).filter(message -> {
                 for (final String part : messagePartsToIgnore) {
                     if (message.getMessage().contains(part)) {
                         return false;
