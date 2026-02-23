@@ -1,4 +1,4 @@
-package de.codefever.conviva.api.signal;
+package de.codefever.conviva.api.signal.websocket;
 
 import eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider;
 import eu.tsystems.mms.tic.testframework.logging.Loggable;

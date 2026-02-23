@@ -1,5 +1,6 @@
-package de.codefever.conviva.api.signal;
+package de.codefever.conviva.api.signal.rest;
 
+import de.codefever.conviva.api.signal.websocket.SignalWebSocketClient;
 import de.codefever.conviva.model.signal.Configuration;
 import de.codefever.conviva.model.signal.Group;
 import de.codefever.conviva.model.signal.GroupInfo;

@@ -1,9 +1,9 @@
 package de.codefever.conviva.tests;
 
 import de.codefever.conviva.AbstractTest;
-import de.codefever.conviva.api.signal.EventBus;
-import de.codefever.conviva.api.signal.SignalCliRestApiClient;
-import de.codefever.conviva.api.signal.SignalWebSocketClient;
+import de.codefever.conviva.api.signal.event.EventBus;
+import de.codefever.conviva.api.signal.rest.SignalCliRestApiClient;
+import de.codefever.conviva.api.signal.websocket.SignalWebSocketClient;
 import de.codefever.conviva.model.signal.Configuration;
 import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;

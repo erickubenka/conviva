@@ -1,6 +1,6 @@
-package de.codefever.conviva.api.general.command;
+package de.codefever.conviva.api.common.command;
 
-import de.codefever.conviva.api.general.prompt.GenericAssistantPrompt;
+import de.codefever.conviva.api.common.prompt.GenericAssistantPrompt;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.model.general.Message;
 

@@ -1,8 +1,8 @@
 package de.codefever.conviva.tests;
 
 import de.codefever.conviva.AbstractTest;
-import de.codefever.conviva.api.general.prompt.GenericAssistantPrompt;
-import de.codefever.conviva.api.general.prompt.SummaryPrompt;
+import de.codefever.conviva.api.common.prompt.GenericAssistantPrompt;
+import de.codefever.conviva.api.common.prompt.SummaryPrompt;
 import de.codefever.conviva.api.openai.CompletionsApiClient;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;

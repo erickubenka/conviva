@@ -1,4 +1,4 @@
-package de.codefever.conviva.api.general.prompt;
+package de.codefever.conviva.api.common.prompt;
 
 import de.codefever.conviva.model.openai.Prompt;
 

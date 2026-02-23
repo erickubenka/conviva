@@ -1,4 +1,4 @@
-package de.codefever.conviva.api.signal;
+package de.codefever.conviva.api.signal.event;
 
 import de.codefever.conviva.model.signal.SignalMessage;
 

@@ -1,13 +1,16 @@
 package de.codefever.conviva.api.signal;
 
-import de.codefever.conviva.api.general.command.BotCommand;
-import de.codefever.conviva.api.general.command.BugCommand;
-import de.codefever.conviva.api.general.command.GenericOpenAiAssistantCommand;
-import de.codefever.conviva.api.general.command.HelpCommand;
-import de.codefever.conviva.api.general.command.StatusCommand;
-import de.codefever.conviva.api.general.command.SupCommand;
-import de.codefever.conviva.api.general.command.TldrCommand;
-import de.codefever.conviva.api.general.command.TopPostCommand;
+import de.codefever.conviva.api.common.command.BotCommand;
+import de.codefever.conviva.api.common.command.BugCommand;
+import de.codefever.conviva.api.common.command.GenericOpenAiAssistantCommand;
+import de.codefever.conviva.api.common.command.HelpCommand;
+import de.codefever.conviva.api.common.command.StatusCommand;
+import de.codefever.conviva.api.common.command.SupCommand;
+import de.codefever.conviva.api.common.command.TldrCommand;
+import de.codefever.conviva.api.common.command.TopPostCommand;
+import de.codefever.conviva.api.signal.event.EventBus;
+import de.codefever.conviva.api.signal.rest.SignalCliRestApiClient;
+import de.codefever.conviva.api.signal.websocket.SignalWebSocketClient;
 import de.codefever.conviva.model.general.Message;
 import de.codefever.conviva.model.signal.Group;
 import de.codefever.conviva.model.signal.SignalMessage;

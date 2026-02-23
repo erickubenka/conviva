@@ -1,4 +1,4 @@
-package de.codefever.conviva.api.general.command;
+package de.codefever.conviva.api.common.command;
 
 import de.codefever.conviva.model.general.Message;
 
