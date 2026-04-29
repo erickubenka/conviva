@@ -1,11 +1,12 @@
 # conviva
 
-Conviva is a simple Whatsapp Bot based on UI automation with Selenium and Testerra to answer commands in a specific
-group chat.
+Conviva started as a simple Whatsapp Bot based on UI automation with Selenium and Testerra to answer commands in a
+specific
+group chat. Since 2026 it also supports Signal Messenger as a lot of my Group Chats went to Signal.
 
 --- 
 
-## How it works
+## How it works with WhatsApp
 
 Conviva starts a headless browser session on the host system (for example chromium) and then uses Testerra and Selenium
 Automation Tools to automate the UI of web.whatsapp.com as WhatsApp does not provide an open API for non-business
@@ -21,6 +22,13 @@ specified task and answer into the group chat.
 
 **Recommendation:** Use a dedicated phone number for the bot, as otherwise your own user session will be blocked by the
 bot instance and you won't receive notifications fo the group chat anymore.
+
+## How it works with Signal
+
+Conviva needs a signal-cli-rest-api instance running and connects to this via Websocket and HTTP API. Additionally
+Conviva needs a registered Account as well to be enabled.
+
+Conviva will NOT read messages from the past at the start up and will always start with a message count of 0. 
 
 ## Features
 
