@@ -27,6 +27,7 @@ import java.util.TimeZone;
 
 public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider {
 
+    // fixme : this should be configurable via properties file.
     private final static String API_URL = "http://192.168.178.126:9999/";
     private final static String PHONE_NUMBER = PROPERTY_MANAGER.getProperty("conviva.auth.phone.number");
     private final static String PHONE_PREFIX = PROPERTY_MANAGER.getProperty("conviva.auth.phone.prefix");

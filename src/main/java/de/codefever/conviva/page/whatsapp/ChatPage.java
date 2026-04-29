@@ -1,5 +1,6 @@
 package de.codefever.conviva.page.whatsapp;
 
+import de.codefever.conviva.model.general.Message;
 import de.codefever.conviva.model.whatsapp.WhatsappMessage;
 import eu.tsystems.mms.tic.testframework.exceptions.UiElementAssertionError;
 import eu.tsystems.mms.tic.testframework.pageobjects.Check;
@@ -74,10 +75,10 @@ public class ChatPage extends HomePage {
      * @param count {@link Integer}
      * @return {@link List} of {@link WhatsappMessage}
      */
-    public List<WhatsappMessage> visibleMessages(final int count, final boolean includeOwnMessages) {
+    public List<Message> visibleMessages(final int count, final boolean includeOwnMessages) {
 
         final UiElement divMessageIn = find(By.cssSelector("div.message-in div.copyable-text"));
-        final List<WhatsappMessage> messages = new ArrayList<>(this.readMessagesFromList(divMessageIn, count));
+        final List<Message> messages = new ArrayList<>(this.readMessagesFromList(divMessageIn, count));
 
         if (includeOwnMessages) {
             UiElement divMessageOut = find(By.cssSelector("div.message-out div.copyable-text"));
@@ -92,7 +93,7 @@ public class ChatPage extends HomePage {
      *
      * @return {@link List} of {@link WhatsappMessage}
      */
-    public List<WhatsappMessage> visibleMessages(final boolean includeOwnMessages) {
+    public List<Message> visibleMessages(final boolean includeOwnMessages) {
         return this.visibleMessages(-1, includeOwnMessages);
     }
 
@@ -101,9 +102,9 @@ public class ChatPage extends HomePage {
      *
      * @param dateTime     {@link LocalDateTime}
      * @param startTimeout {@link Integer}
-     * @return {@link List} of {@link WhatsappMessage}
+     * @return {@link List} of {@link Message}
      */
-    public List<WhatsappMessage> allMessagesAfter(final LocalDateTime dateTime, final int startTimeout, final boolean includeOwnMessages) {
+    public List<Message> allMessagesAfter(final LocalDateTime dateTime, final int startTimeout, final boolean includeOwnMessages) {
 
         final LocalDateTime startTime = LocalDateTime.now();
         while (LocalDateTime.now().isBefore(startTime.plusMinutes(startTimeout))) {
@@ -118,8 +119,8 @@ public class ChatPage extends HomePage {
             TimerUtils.sleep(500);
         }
 
-        final List<WhatsappMessage> visibleMessages = this.visibleMessages(includeOwnMessages);
-        visibleMessages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
+        final List<Message> visibleMessages = this.visibleMessages(includeOwnMessages);
+        visibleMessages.sort(Comparator.comparing(Message::getDateTime));
         log().info("Found {} messages in {} seconds.", visibleMessages.size(), ChronoUnit.SECONDS.between(startTime, LocalDateTime.now()));
         return visibleMessages;
     }
@@ -187,10 +188,10 @@ public class ChatPage extends HomePage {
      * @param includeOwnMessages {@link Boolean}
      * @return {@link WhatsappMessage}
      */
-    public WhatsappMessage lastMessageOfList(final boolean includeOwnMessages) {
-        final List<WhatsappMessage> foundMessages = this.visibleMessages(1, includeOwnMessages);
+    public Message lastMessageOfList(final boolean includeOwnMessages) {
+        final List<Message> foundMessages = this.visibleMessages(1, includeOwnMessages);
         if (!foundMessages.isEmpty()) {
-            foundMessages.sort(Comparator.comparing(WhatsappMessage::getDateTime).reversed());
+            foundMessages.sort(Comparator.comparing(Message::getDateTime).reversed());
             return foundMessages.get(0);
         }
 

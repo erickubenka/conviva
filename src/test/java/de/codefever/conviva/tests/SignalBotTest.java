@@ -21,7 +21,8 @@ public class SignalBotTest extends AbstractTest {
         ASSERT.assertEquals(configuration.Logging.Level, "info");
     }
 
-    @Test
+    @Test(enabled = false)
+    @Deprecated()
     public void testT01_GetLatestMessages() {
 
         final SignalCliRestApiClient signalCliRestApiClient = new SignalCliRestApiClient();

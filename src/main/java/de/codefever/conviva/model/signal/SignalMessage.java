@@ -4,6 +4,7 @@ import de.codefever.conviva.model.general.Message;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import static eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider.PROPERTY_MANAGER;
@@ -11,10 +12,10 @@ import static eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider.P
 /**
  * {
  *     "envelope": {
- *       "source": "+4915142324728",
- *       "sourceNumber": "+4915142324728",
- *       "sourceUuid": "5449c4ef-ce34-4bc8-be3a-4c404fab0edf",
- *       "sourceName": "Eric",
+ *       "source": "+xx",
+ *       "sourceNumber": "+xx",
+ *       "sourceUuid": "xx",
+ *       "sourceName": "xx",
  *       "sourceDevice": 1,
  *       "timestamp": 1769528053253,
  *       "serverReceivedTimestamp": 1769528053373,
@@ -27,21 +28,33 @@ import static eu.tsystems.mms.tic.testframework.common.PropertyManagerProvider.P
  *         "viewOnce": false,
  *         "quote": {
  *           "id": 1769527117081,
- *           "author": "+4915142324728",
- *           "authorNumber": "+4915142324728",
- *           "authorUuid": "5449c4ef-ce34-4bc8-be3a-4c404fab0edf",
+ *           "author": "+xx",
+ *           "authorNumber": "+xx",
+ *           "authorUuid": "xx",
  *           "text": "Die sollte er ja easy ausführen können",
  *           "attachments": []
  *         },
  *         "groupInfo": {
- *           "groupId": "U+sJJ8zo7C6scZrJAyDoFAsM+4MyjJ9fCKCV42chLsE=",
- *           "groupName": "Alternative F_ragstergruppe",
+ *           "groupId": "xx",
+ *           "groupName": "xx",
  *           "revision": 49,
  *           "type": "DELIVER"
- *         }
+ *         },
+ *         attachments":[
+ *             {
+ *                "contentType":"image/png",
+ *                "filename":null,
+ *                "id":"Td0m0WtATCxwFtXl40q3.png",
+ *                "size":145165,
+ *                "width":600,
+ *                "height":894,
+ *                "caption":null,
+ *                "uploadTimestamp":1772525697995
+ *             }
+ *          ]
  *       }
  *     },
- *     "account": "+491628293597"
+ *     "account": "+xx"
  *   }
  */
 public class SignalMessage implements Message {
@@ -55,6 +68,9 @@ public class SignalMessage implements Message {
 
     // splitted on \n
     private String message;
+
+    // List of Attachments
+    private List<Attachment> attachments;
 
     public Long getTimestamp() {
         return timestamp;
@@ -103,6 +119,11 @@ public class SignalMessage implements Message {
         return this.quote != null ? this.quote.getMessage() : null;
     }
 
+    @Override
+    public void setQuotedMessage(String message) {
+        throw new RuntimeException("Not implemented");
+    }
+
     public void setQuote(QuotedMessage quote) {
         this.quote = quote;
     }
@@ -125,5 +146,13 @@ public class SignalMessage implements Message {
                 "timestampDateTime=" + timestampDateTime +
                 ", message='" + message + '\'' +
                 '}';
+    }
+
+    public void setAttachments(final List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
     }
 }

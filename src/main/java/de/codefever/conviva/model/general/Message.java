@@ -14,4 +14,5 @@ public interface Message extends Loggable {
 
     String getQuotedMessage();
 
+    void setQuotedMessage(String message);
 }

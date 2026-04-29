@@ -6,6 +6,7 @@ import de.codefever.conviva.api.common.prompt.SummaryPrompt;
 import de.codefever.conviva.api.openai.CompletionsApiClient;
 import de.codefever.conviva.api.openai.ResponsesApiClient;
 import de.codefever.conviva.api.whatsapp.WhatsAppUiBot;
+import de.codefever.conviva.model.general.Message;
 import de.codefever.conviva.model.openai.Prompt;
 import de.codefever.conviva.model.whatsapp.WhatsappMessage;
 import de.codefever.conviva.page.whatsapp.ChatPage;
@@ -20,6 +21,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
 
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
         UITestUtils.takeScreenshot(homePage.getWebDriver(), true);
-        List<WhatsappMessage> messages = chatPage.visibleMessages(5, false);
+        List<Message> messages = chatPage.visibleMessages(5, false);
 
         ASSERT.assertNotEquals(messages.size(), 0);
     }
@@ -62,7 +64,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         HomePage homePage = page.waitForQrCodeScanned();
 
         ChatPage chatPage = homePage.openChat("Eric Kubenka");
-        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(2), 2, true);
+        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(2), 2, true);
         ASSERT.assertNotEquals(messages.size(), 0);
     }
 
@@ -95,7 +97,7 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
     @Test
     public void testT03_RunSummaryForTestData() {
         // random messages for testing
-        List<WhatsappMessage> messages = new ArrayList<>();
+        List<Message> messages = new ArrayList<>();
         messages.add(new WhatsappMessage("[07:49, 4/19/2024] User:", "Unglaublich, dass Dortmund gegen Bayern gewinnen wird!"));
         messages.add(new WhatsappMessage("[07:50, 4/19/2024] OtherUser:", "Ja, das war wirklich eine Überaschung."));
         messages.add(new WhatsappMessage("[07:54, 4/19/2024] OtherUser:", "Vor allem, dass es dann ausgerechnet Hummels ist."));
@@ -121,7 +123,12 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         messages.add(new WhatsappMessage("[17:55, 4/19/2024] OtherUser:", "Und mit dem Thema bzgl. Gotha haben sie natürlich absolut recht."));
 
 
-        final SummaryPrompt prompt = new SummaryPrompt(messages);
+        final List<String> preparedMessages = new ArrayList<>();
+        for (final Message message : messages) {
+            preparedMessages.add(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage()));
+        }
+
+        final SummaryPrompt prompt = new SummaryPrompt(preparedMessages);
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
     }
@@ -131,8 +138,15 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         LoginPage page = PAGE_FACTORY.createPage(LoginPage.class);
         HomePage homePage = page.waitForQrCodeScanned();
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
-        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
-        final SummaryPrompt prompt = new SummaryPrompt(messages);
+        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
+
+        final List<String> preparedMessages = new ArrayList<>();
+        for (final Message message : messages) {
+            preparedMessages.add(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage()));
+        }
+
+
+        final SummaryPrompt prompt = new SummaryPrompt(preparedMessages);
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
     }
@@ -143,8 +157,14 @@ public class WhatsAppBotTest extends AbstractTest implements PageFactoryProvider
         HomePage homePage = page.waitForQrCodeScanned();
         ChatPage chatPage = homePage.openChat("AktiF_gruppe Sauerland");
 
-        List<WhatsappMessage> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
-        final SummaryPrompt prompt = new SummaryPrompt(messages);
+        List<Message> messages = chatPage.allMessagesAfter(LocalDateTime.now().minusHours(4), 2, true);
+        final List<String> preparedMessages = new ArrayList<>();
+        for (final Message message : messages) {
+            preparedMessages.add(String.format("%s : %s", message.getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), message.getMessage()));
+        }
+
+
+        final SummaryPrompt prompt = new SummaryPrompt(preparedMessages);
         final String summary = new ResponsesApiClient().postResponseRequest(prompt);
         log().info("Summary: " + summary);
 

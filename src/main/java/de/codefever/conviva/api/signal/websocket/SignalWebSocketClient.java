@@ -11,6 +11,7 @@ public class SignalWebSocketClient implements Loggable, PropertyManagerProvider 
 
     private final static String PHONE_NUMBER = PROPERTY_MANAGER.getProperty("conviva.auth.phone.number");
     private final static String PHONE_PREFIX = PROPERTY_MANAGER.getProperty("conviva.auth.phone.prefix");
+    // fixme : this should be configurable via properties file.
     private final static String WS_URL = "ws://192.168.178.126:9999/v1/receive/" + PHONE_PREFIX + PHONE_NUMBER;
 
     public SignalWebSocketClient() {

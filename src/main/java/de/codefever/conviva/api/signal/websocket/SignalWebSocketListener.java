@@ -1,6 +1,7 @@
 package de.codefever.conviva.api.signal.websocket;
 
 import de.codefever.conviva.api.signal.event.EventBus;
+import de.codefever.conviva.model.signal.Attachment;
 import de.codefever.conviva.model.signal.GroupInfo;
 import de.codefever.conviva.model.signal.QuotedMessage;
 import de.codefever.conviva.model.signal.SignalMessage;
@@ -9,6 +10,8 @@ import org.json.JSONObject;
 
 import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 public class SignalWebSocketListener implements Loggable, WebSocket.Listener {
@@ -58,6 +61,27 @@ public class SignalWebSocketListener implements Loggable, WebSocket.Listener {
                         final QuotedMessage quotedMessage = new QuotedMessage(quotedAuthor, quotedText);
                         message.setQuote(quotedMessage);
                     }
+
+                    // handle attachments if needed, it is always a list
+                    if (dataMessageObject.has("attachments") && !dataMessageObject.isNull("attachments")) {
+
+                        final List<Attachment> attachments = new ArrayList<>();
+                        for (int i = 0; i < dataMessageObject.getJSONArray("attachments").length(); i++) {
+                            final JSONObject attachmentObject = dataMessageObject.getJSONArray("attachments").getJSONObject(i);
+
+                            final Attachment attachment = new Attachment();
+
+                            final String id = attachmentObject.getString("id");
+                            final String contentType = attachmentObject.getString("contentType");
+
+                            attachment.setId(id);
+                            attachment.setContentType(contentType);
+
+                            attachments.add(attachment);
+                        }
+
+                        message.setAttachments(attachments);
+                    }
                 }
 
                 // extract meta data one by one.
@@ -76,8 +100,7 @@ public class SignalWebSocketListener implements Loggable, WebSocket.Listener {
                 log().info("Adding message to EventBus: {}", message);
                 EventBus.getInstance().publish(message);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log().error("Error processing WebSocket message: {}", e.getMessage());
         }
         webSocket.request(1);

@@ -100,7 +100,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
     /**
      * List of messages the bot has read.
      */
-    private final List<WhatsappMessage> messages = Collections.synchronizedList(new ArrayList<>());
+    private final List<Message> messages = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * List of threads the bot has started.
@@ -179,7 +179,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         // init messages and get rid of old stuff.
         this.messages.addAll(chatPage.allMessagesAfter(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS), START_TIMEOUT, DEBUG_READ_OWN_MESSAGES));
         this.messages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
-        this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
+        this.messages.sort(Comparator.comparing(Message::getDateTime));
 
         // reload for run process
         chatPage.getWebDriver().navigate().refresh();
@@ -189,8 +189,8 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
         log().info("Initialized. Current messages for today: {}", messages.size());
         boolean stop = false;
         while (!stop) {
-            this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
-            final List<WhatsappMessage> potentiallyNewMessages = new ArrayList<>();
+            this.messages.sort(Comparator.comparing(Message::getDateTime));
+            final List<Message> potentiallyNewMessages = new ArrayList<>();
 
             try {
                 // break loop detection, so we have to go for a double class init to break buffer
@@ -201,7 +201,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                 // find last message and check if already in message list
                 // if we already know this message, just continue
                 // if not, get last 5 messages to ensure we got everything that is possibly new.
-                final WhatsappMessage message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
+                final Message message = chatPage.lastMessageOfList(DEBUG_READ_OWN_MESSAGES);
                 if (message != null && !this.messages.contains(message)) {
                     potentiallyNewMessages.addAll(chatPage.visibleMessages(5, DEBUG_READ_OWN_MESSAGES));
                 }
@@ -217,10 +217,10 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
             }
 
             // if we have potentially new messages, check them
-            this.messages.sort(Comparator.comparing(WhatsappMessage::getDateTime));
+            this.messages.sort(Comparator.comparing(Message::getDateTime));
             potentiallyNewMessages.removeIf(message -> message.getDateTime().isBefore(LocalDateTime.now().minusHours(MAX_CACHE_TIME_IN_HOURS)));
             if (!potentiallyNewMessages.isEmpty()) {
-                for (final WhatsappMessage newMessage : potentiallyNewMessages) {
+                for (final Message newMessage : potentiallyNewMessages) {
                     if (!messages.contains(newMessage)) {
                         messages.add(newMessage);
                         log().info("Added message to list: {}", newMessage.getMessage());
@@ -242,7 +242,7 @@ public class WhatsAppUiBot implements Runnable, Loggable, PageFactoryProvider, W
                                             // For long quoted messages we search them in our own history to run commands with them
                                             // if the message is not in our own history, we just use the snippet we have
                                             if (newMessage.hasQuotedMessage()) {
-                                                final WhatsappMessage quotedMessageInHistory = messages.stream().filter(message -> message.getMessage().contains(newMessage.getQuotedMessage())).findFirst().orElse(null);
+                                                final Message quotedMessageInHistory = messages.stream().filter(message -> message.getMessage().contains(newMessage.getQuotedMessage())).findFirst().orElse(null);
                                                 if (quotedMessageInHistory != null) {
                                                     newMessage.setQuotedMessage(quotedMessageInHistory.getMessage());
                                                 }
