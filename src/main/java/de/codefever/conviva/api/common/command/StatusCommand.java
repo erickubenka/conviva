@@ -39,9 +39,11 @@ public class StatusCommand implements BotCommand {
             return "";
         }
 
+        final String firstMessageTime =  messages.size() == 0 ? "n/a" : messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+
         return "Online seit " + startTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + ". " +
                 "\nVerfügbare Nachrichten: " + messages.size() +
-                "\nErste Nachricht von: " + messages.get(0).getDateTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+                "\nErste Nachricht von: " + firstMessageTime;
     }
 
     @Override
