@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -60,13 +61,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
     /**
      * Group ID where the bot is active and should listen to.
      */
-    private static final String BOT_GROUP_ID = PROPERTY_MANAGER.getProperty("conviva.bot.signal.group.id");
-
-    /**
-     * Recipient of bot messages (group id or phone number).
-     */
-    private static final String BOT_RECIPIENT = PROPERTY_MANAGER.getProperty("conviva.bot.signal.recipient");
-
+    private static final List<String> BOT_GROUP_IDS = Arrays.asList(PROPERTY_MANAGER.getProperty("conviva.bot.signal.group.id").split(","));
 
     /**
      * ExecutionContext of this bot instance.
@@ -133,7 +128,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
 
         // fetch the internal id of the group.
         final List<Group> groups = signalCliRestApiClient.getGroups();
-        final Group group = groups.stream().filter(g -> g.getId().equals(BOT_GROUP_ID)).findFirst().get();
+        final List<Group> groupsAllowed = groups.stream().filter(g -> BOT_GROUP_IDS.contains(g.getId())).collect(Collectors.toList());
 
         final SignalWebSocketClient signalWebSocketClient = new SignalWebSocketClient();
         signalWebSocketClient.start();
@@ -147,8 +142,11 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
                     return;
                 }
 
-                // filter everything that is not from the configured group.
-                if (msg.isFromGroup() && !msg.getGroupInfo().getGroupId().equals(group.getInternalId())) {
+                // find correct group by internal id from message
+                final Group sourceAndRecipient = groupsAllowed.stream().filter(g -> g.getInternalId().equals(msg.getGroupInfo().getGroupId())).findFirst().orElse(null);
+
+                // this message is from a group and the source is not in the allowedList --> remove
+                if(sourceAndRecipient == null) {
                     return;
                 }
 
@@ -172,18 +170,18 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
 
                                     // anything to say before run a potential heavy-load command?
                                     if (!StringUtils.isBlank(command.beforeMessage())) {
-                                        signalCliRestApiClient.postSendMessage(command.beforeMessage(), BOT_RECIPIENT);
+                                        signalCliRestApiClient.postSendMessage(command.beforeMessage(), sourceAndRecipient.getId());
                                     }
 
                                     // run command
                                     final String commandOutput = command.run(msg, this.filterMessages());
                                     if (!StringUtils.isBlank(commandOutput)) {
-                                        signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, BOT_RECIPIENT);
+                                        signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, sourceAndRecipient.getId());
                                     }
 
                                     // anything to say after this command?
                                     if (!StringUtils.isBlank(command.afterMessage())) {
-                                        signalCliRestApiClient.postSendMessage(command.afterMessage(), BOT_RECIPIENT);
+                                        signalCliRestApiClient.postSendMessage(command.afterMessage(), sourceAndRecipient.getId());
                                     }
                                 });
 

@@ -5,6 +5,7 @@ import de.codefever.conviva.api.signal.event.EventBus;
 import de.codefever.conviva.api.signal.rest.SignalCliRestApiClient;
 import de.codefever.conviva.api.signal.websocket.SignalWebSocketClient;
 import de.codefever.conviva.model.signal.Configuration;
+import de.codefever.conviva.model.signal.Group;
 import de.codefever.conviva.model.signal.SignalMessage;
 import eu.tsystems.mms.tic.testframework.utils.TimerUtils;
 import org.testng.annotations.Test;
@@ -52,5 +53,17 @@ public class SignalBotTest extends AbstractTest {
             TimerUtils.sleep(1000, "Waiting for messages...");
             timeoutInMs -= 1000;
         }
+    }
+
+    @Test
+    public void testT05_GetGroups(){
+        final SignalCliRestApiClient signalCliRestApiClient = new SignalCliRestApiClient();
+
+        final List<Group> groups = signalCliRestApiClient.getGroups();
+        ASSERT.assertNotNull(groups);
+        ASSERT.assertTrue(groups.size() > 0);
+
+        // Log all groups for easier debugging and visibility in test reports.
+        groups.forEach(group -> log().info("Group: {}", group));
     }
 }

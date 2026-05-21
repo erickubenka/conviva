@@ -56,4 +56,13 @@ public class Group {
     public void setInternalId(String internalId) {
         this.internalId = internalId;
     }
+
+    @Override
+    public String toString() {
+        return "Group{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", internalId='" + internalId + '\'' +
+                '}';
+    }
 }
