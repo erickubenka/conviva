@@ -174,7 +174,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
                                     }
 
                                     // run command
-                                    final String commandOutput = command.run(msg, this.filterMessages());
+                                    final String commandOutput = command.run(msg, this.filterMessages(sourceAndRecipient));
                                     if (!StringUtils.isBlank(commandOutput)) {
                                         signalCliRestApiClient.postSendMessage(command.outputIdentifier() + "\n" + commandOutput, sourceAndRecipient.getId());
                                     }
@@ -221,7 +221,7 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
      *
      * @return filtered list of {@link SignalMessage} that currently stored for this instance
      */
-    private synchronized List<Message> filterMessages() {
+    private synchronized List<Message> filterMessages(final Group sourceAndRecipient) {
 
         final List<String> messagePartsToIgnore = new ArrayList<>();
         commands.forEach(command -> {
@@ -244,7 +244,10 @@ public class SignalApiBot implements Runnable, Loggable, PropertyManagerProvider
         });
 
         synchronized (LOCK) {
-            return this.messages.stream().filter(SignalMessage::hasMessage).filter(message -> {
+            return this.messages.stream()
+                    .filter(SignalMessage::hasMessage)
+                    .filter(message -> message.getGroupInfo().getGroupId().equals(sourceAndRecipient.getInternalId()))
+                    .filter(message -> {
                 for (final String part : messagePartsToIgnore) {
                     if (message.getMessage().contains(part)) {
                         return false;
