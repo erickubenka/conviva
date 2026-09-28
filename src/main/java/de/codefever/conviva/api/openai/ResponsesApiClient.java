@@ -72,8 +72,6 @@ public class ResponsesApiClient implements Loggable, PropertyManagerProvider {
                 .uri(URI.create(API_URL))
                 .header("Authorization", "Bearer " + API_KEY)
                 .header("Content-Type", "application/json; charset=utf-8")
-                .header("Accept", "application/json")
-                .header("Content-Encoding", "UTF-8")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString(), StandardCharsets.UTF_8))
                 .build();
 
