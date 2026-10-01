@@ -213,7 +213,8 @@ public class SignalCliRestApiClient implements Loggable, PropertyManagerProvider
             log().info("Response Code: {}", response.statusCode());
             log().info("Signal CLI REST API Response: {}", response.body());
 
-            final JSONObject jsonResponse = new JSONObject(response.body());
+            final JSONArray jsonResponseArray = new JSONArray(response.body());
+            final JSONObject jsonResponse = jsonResponseArray.getJSONObject(0);
             if (jsonResponse.has("timestamp")) {
                 final String timestamp = jsonResponse.getString("timestamp");
 
